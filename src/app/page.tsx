@@ -25,7 +25,7 @@ export default function HomePage() {
       <div className="overview-grid">
         <Card aria-labelledby="lesson-title">
           <div className="card-heading"><span className="icon-tile"><BookOpen size={21} aria-hidden="true" /></span><h2 id="lesson-title">Your study workspace</h2></div>
-          <p>The workspace is being prepared. Interactive lessons are not available yet.</p>
+          <p>Work through a linear equation and check each step. AI guidance is not connected yet.</p>
           <Link href="/study" className="text-link">Explore the layout<ArrowRight size={17} aria-hidden="true" /></Link>
         </Card>
         <Card aria-labelledby="history-title">

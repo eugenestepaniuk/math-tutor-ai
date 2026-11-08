@@ -188,3 +188,108 @@ h1 { font-size: clamp(1.75rem, 2.5vw, 2.25rem); font-weight: 700; letter-spacing
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 }
+
+/* Study: problem first, independent checker and reasoning beside it. */
+.lesson-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-6); margin-bottom: var(--space-8); }
+.lesson-heading h1 { font-size: clamp(1.75rem, 2.4vw, 2.125rem); }
+.lesson-tag { display: inline-flex; align-items: center; gap: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: var(--space-2) var(--space-4); background: var(--surface); color: var(--text-muted); font-size: 0.75rem; white-space: nowrap; }
+.lesson-grid { align-items: start; }
+.problem-column { min-width: 0; }
+.solve-card { padding: var(--space-8); }
+.task-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-5); }
+.lesson-level { color: var(--text-muted); font-size: 0.75rem; }
+.solve-card > h2 { font-size: 1.375rem; font-weight: 700; }
+.equation-display { display: flex; align-items: center; justify-content: center; min-height: 110px; max-width: 100%; overflow-x: auto; margin: var(--space-5) 0 var(--space-8); padding: var(--space-5) var(--space-3); border: 1px solid var(--border); border-radius: var(--control-radius); background: linear-gradient(120deg, var(--surface-muted), var(--brand-blue-light)); font-size: clamp(1.5rem, 2.6vw, 2rem); }
+.math-text { display: inline-block; white-space: nowrap; }
+.math-text .katex { font-size: 1em; }
+.math-scroll { max-width: 100%; min-width: 0; overflow-x: auto; padding-block: var(--space-1); }
+.current-line { margin: calc(-1 * var(--space-4)) 0 var(--space-6); padding-left: var(--space-3); border-left: 2px solid var(--brand-blue-light); }
+.current-line > span { color: var(--text-muted); font-size: 0.6875rem; }
+.current-line .math-text { font-size: 1.125rem; }
+.solution-label { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-2); }
+.solution-label label { font-size: 0.875rem; font-weight: 500; }
+.sample-button { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; border-radius: var(--control-radius); padding: var(--space-2) var(--space-1); color: var(--brand-blue-dark); font-size: 0.6875rem; font-weight: 500; transition: background-color var(--dur-ui) var(--ease-ui); }
+.equation-input { display: block; width: 100%; height: 76px; border: 1px solid var(--text-muted); border-radius: var(--control-radius); padding: var(--space-4); background: var(--surface); color: var(--ink); font-family: var(--font-math); font-size: 1.625rem; }
+.equation-input::placeholder { color: var(--text-muted); font-family: var(--font-ui); font-size: 1rem; }
+.equation-input[aria-invalid="true"] { border-color: var(--error); background: #fffafb; }
+.card .equation-help { margin-top: var(--space-3); color: var(--text-muted); font-size: 0.75rem; }
+.card .inline-math-error { display: flex; gap: var(--space-2); align-items: flex-start; margin-top: var(--space-3); color: #b42335; font-size: 0.8125rem; }
+.inline-math-error svg { margin-top: 3px; }
+.math-keypad { display: grid; grid-template-columns: repeat(8, minmax(44px, 1fr)); gap: var(--space-2); margin: var(--space-6) 0; }
+.math-keypad button { display: flex; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-muted); color: var(--ink); font-size: 1rem; transition: background-color var(--dur-ui) var(--ease-ui); }
+.check-step-button { width: 100%; }
+.enter-hint { display: inline-flex; align-items: center; gap: var(--space-1); margin-left: auto; font-size: 0.625rem; font-weight: 400; }
+.network-error { margin-bottom: var(--space-4); color: #b42335 !important; }
+.reset-area { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-3); }
+.reset-area > span { color: var(--text-muted); font-size: 0.75rem; }
+.key-idea { display: flex; align-items: center; gap: var(--space-4); margin: var(--space-5) var(--space-2); }
+.key-idea .icon-tile { width: 56px; height: 56px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--card-shadow); }
+.key-idea p { color: var(--brand-blue-dark); font-size: 0.6875rem; }
+.key-idea h2 { margin: var(--space-1) 0; font-size: 0.9375rem; font-weight: 600; }
+.key-idea .math-text { color: var(--brand-blue-dark); font-size: 1rem; }
+.lesson-tutor { padding: var(--space-8); }
+.tutor-avatar { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border: 6px solid var(--surface-muted); border-radius: var(--radius-pill); background: var(--brand-blue-light); color: var(--brand-blue-dark); }
+.lesson-tutor .tutor-heading h2 { font-size: 1.25rem; }
+.integration-note { margin: var(--space-5) 0; padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--control-radius); background: var(--surface-muted); }
+.integration-note p { margin-bottom: var(--space-2); color: var(--ink); font-size: 0.8125rem; font-weight: 500; }
+.integration-note > span { display: block; color: var(--text-muted); font-size: 0.75rem; }
+.checker-feedback { padding: var(--space-5); border: 1px solid var(--border); border-radius: var(--control-radius); background: var(--surface-muted); }
+.feedback-label { margin-bottom: var(--space-3); color: var(--text-muted); font-size: 0.625rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+.checker-feedback h3 { display: flex; align-items: flex-start; gap: var(--space-2); margin-bottom: var(--space-3); font-size: 1rem; font-weight: 600; }
+.checker-feedback h3 svg { margin-top: 1px; }
+.checker-feedback p { font-size: 0.875rem; }
+.checker-feedback[data-verdict="incorrect"] { border-color: #f0c1c6; background: #fff8f8; }
+.checker-feedback[data-verdict="correct"] { border-color: #b9e1cd; background: #f2fbf6; }
+.checker-feedback[data-verdict="correct"] h3 { color: #16623e; }
+.rule-button { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 48px; margin-top: var(--space-4); border: 1px solid var(--border); border-radius: var(--control-radius); padding: var(--space-3) var(--space-4); color: var(--brand-blue-dark); font-size: 0.8125rem; font-weight: 500; }
+.rule-button svg:last-child { margin-left: auto; transition: transform var(--dur-ui) var(--ease-ui); }
+.rule-button .turned { transform: rotate(90deg); }
+.rule-reminder { margin-top: var(--space-3); border-radius: var(--control-radius); padding: var(--space-5); background: var(--brand-blue-light); }
+.rule-reminder h3 { font-size: 0.9375rem; font-weight: 600; }
+.rule-reminder p { margin: var(--space-3) 0; color: var(--ink); font-size: 0.875rem; }
+.rule-reminder > span:last-child { display: block; margin-top: var(--space-3); color: var(--text-muted); font-size: 0.6875rem; }
+.reasoning-history { margin-top: var(--space-6); }
+.history-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4); }
+.history-heading h3 { font-size: 0.875rem; font-weight: 600; }
+.history-heading > span { color: var(--text-muted); font-size: 0.6875rem; }
+.history-empty { border-left: 2px solid var(--border); padding: var(--space-2) var(--space-4); font-size: 0.8125rem !important; }
+.reasoning-history ol { display: grid; gap: var(--space-3); max-height: 260px; overflow-y: auto; padding: 0; list-style: none; }
+.reasoning-history li { display: flex; align-items: center; gap: var(--space-3); min-width: 0; font-size: 1.0625rem; }
+.accepted-mark { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex-shrink: 0; border-radius: var(--radius-pill); background: #e3f5e9; color: #16623e; }
+.next-goal { margin-top: var(--space-5); border-top: 1px solid var(--border); padding-top: var(--space-5); }
+.next-goal > span { color: var(--brand-blue-dark); font-size: 0.625rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+.next-goal h3 { margin: var(--space-2) 0; font-size: 0.875rem; font-weight: 600; }
+.next-goal p { font-size: 0.8125rem; }
+.card .session-note { margin-top: var(--space-6); color: var(--text-muted); font-size: 0.6875rem; }
+.completion-panel { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); border: 1px solid #b9e1cd; border-radius: var(--control-radius); padding: var(--space-6); background: #f2fbf6; color: #16623e; text-align: center; }
+.completion-panel h3 { font-size: 1.125rem; font-weight: 600; }
+.completion-panel .math-text { font-size: 1.625rem; }
+.completion-panel p { color: var(--ink); font-size: 0.875rem; }
+.spinner { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (hover: hover) and (pointer: fine) {
+  .sample-button:hover, .math-keypad button:hover, .rule-button:hover { background: var(--brand-blue-light); }
+}
+@media (max-width: 1199px) {
+  .math-keypad { grid-template-columns: repeat(4, minmax(44px, 1fr)); }
+  .solve-card, .lesson-tutor { padding: var(--space-6); }
+  .lesson-tag { display: none; }
+  .enter-hint { display: none; }
+}
+@media (max-width: 767px) {
+  .lesson-heading { margin-bottom: var(--space-6); }
+  .lesson-heading .page-description { font-size: 0.875rem; }
+  .solve-card, .lesson-tutor { padding: var(--space-5); }
+  .equation-display { min-height: 100px; margin-bottom: var(--space-6); font-size: 1.5rem; }
+  .solution-label { gap: 0; }
+  .solution-label label { width: 100%; }
+  .sample-button { min-height: 44px; }
+  .equation-input { font-size: 1.375rem; height: 68px; }
+  .key-idea { margin-bottom: var(--space-2); }
+  .tutor-avatar { width: 56px; height: 56px; }
+  .completion-panel { padding: var(--space-5); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}

@@ -6,6 +6,7 @@ dist/
 coverage/
 playwright-report/
 test-results/
+.vitest/
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store

@@ -43,9 +43,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <header className="topbar">
           <Link className="mobile-brand brand-link" href="/" aria-label="MathTutor AI home"><Brand /></Link>
           <div className="page-context">
-            <span>Workspace</span>
+            <span>{pathname === "/study" ? "Algebra" : "Workspace"}</span>
             <ChevronRight size={14} aria-hidden="true" />
-            <span className="context-current">{page?.label ?? "Page not found"}</span>
+            <span className="context-current">{pathname === "/study" ? "Linear Equations" : page?.label ?? "Page not found"}</span>
           </div>
           <div className="guest-label"><CircleUserRound size={20} aria-hidden="true" /><span>Guest</span></div>
         </header>

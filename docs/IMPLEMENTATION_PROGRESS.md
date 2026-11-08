@@ -2,7 +2,7 @@
 
 ## Current boundary
 
-Phase 0 only. Phase 1 must wait for the owner's explicit approval. Status: Phase 0 scaffold verified. Lint, strict typecheck, production build and all 25 responsive checks pass. Stopping before Phase 1; the identified dev-tooling advisory is resolved with a zero-finding live audit; a separately automated keyboard flow and the lint ecosystem upgrade remain documented follow-ups.
+Phase 1 is implemented and verified: lint, strict typecheck, production build, 54 unit/API/component tests, 6 real-browser E2E scenarios and 30 responsive page-width combinations pass. The origin-normalization regression discovered by E2E is fixed and covered. Stop here: Phase 2 requires the owner's explicit approval. No real or simulated AI calls, follow-up generator or persistent progress metrics have been introduced.
 
 ## Initial audit — 2026-11-08
 
@@ -68,10 +68,10 @@ tests/                      # Math + API contracts; essential UI flows later
 - Next 16.4.5 and React 19.3.1 were checked against the npm registry on 2026-11-08. Tailwind 4.3.5 uses the documented PostCSS integration. Matching Next/ESLint config versions are declared.
 - TypeScript 5.9.3 is supported by the installed typescript-eslint peer range (`>=4.8.4 <6.1.0`). ESLint 9.39.4 passes the current Next configuration but is end-of-life. ESLint 10 is current; installed eslint-plugin-react 7.37.5 and eslint-plugin-jsx-a11y 6.10.2 do not declare ESLint 10 support. Keep this explicit toolchain limitation rather than forcing incompatible peer dependencies. Review an ecosystem-compatible upgrade before release.
 - `lucide-react` supplies consistent line icons. `@fontsource/inter` bundles Inter locally so building does not fetch remote fonts. No animation library is necessary.
-- KaTeX, Zod, OpenAI, Vitest and RTL are deliberately deferred to their implementation phases; no unused AI or math dependencies are installed now.
+- Phase 0 deferred KaTeX, Zod, OpenAI, Vitest and RTL. Phase 1 adds KaTeX, Zod, Vitest/RTL and Playwright as used dependencies; OpenAI remains deferred to Phase 2.
 - MVP storage will be anonymous and local to one browser. No accounts, cloud storage, subscriptions or fabricated mastery.
 - Keep `OPENAI_MODEL=gpt-6-luna` as the supplied future configuration, without claiming account availability. No real secret files are read.
-- No domain or model calls exist; no API status is inferred from configuration. Tutor always says **Not connected** in this phase.
+- Phase 0 had no domain/model calls. Phase 1 adds the independent math endpoint, while the tutor explicitly says **AI integration pending**. No API availability is inferred from configuration.
 - Hosting is planned for the owner's Vercel project, with a separate owner-controlled API account/billing later. Neither is required or configured in Phase 0.
 - The original files are excluded through explicit `.gitignore` entries, rather than ignoring all documentation and accidentally excluding new progress notes.
 
@@ -105,7 +105,7 @@ tests/                      # Math + API contracts; essential UI flows later
 - [x] Verify the 26-file staged change set and prepare the Conventional Commit as the final source-control step, excluding all originals.
 - [x] Stop; await approval before Phase 1.
 
-## Verification — 2026-11-08
+## Phase 0 verification — 2026-11-08
 
 | Check | Result and evidence |
 | --- | --- |
@@ -219,6 +219,88 @@ Sources: [advisory](https://github.com/advisories/GHSA-g3hv-75wg-m249), [patched
 
 The known ESLint 9 end-of-life limitation remains separate from the resolved advisory and is not concealed by the clean audit. No paid API calls, production data, global installs, push or deployment occurred.
 
+## Phase 1 — Study and independent verification
+
+### Implemented plan and file tree
+
+- `src/lib/math/{rational,parser,linear,verifier,format,contracts}.ts`: bounded exact arithmetic, restricted AST, solution-set equivalence, general omitted-distribution evidence, controlled TeX and Zod contracts.
+- `src/app/api/check-step/route.ts`: Node runtime; stream-size/content-type/origin limits; replay every accepted equation from the trusted starter; return a schema-validated public verdict without the canonical answer.
+- `src/components/study/{math-text,study-session,study-workspace}.tsx`: KaTeX rendering, in-memory navigation-persistent session, real form/keypad/retry/reset controls, checker feedback, rule reminder and accepted-step history.
+- Study page/root layout/app shell/CSS: primary two-column reference composition, mobile problem-first stacking, accurate metadata and honest AI state. Home copy now accurately describes available step checking.
+- `tests/math/`, `tests/api/`, `tests/components/`, `tests/e2e/` plus Vitest/Playwright configuration: pure math, trust-boundary tests, in-process UI/API interaction and real-browser scenarios.
+
+### Decisions and scope
+
+- A small custom parser was selected over mathjs to keep the accepted grammar explicit and avoid an arbitrary evaluation surface. No eval, Function constructor or unrestricted expression engine exists.
+- Exact BigInt fractions compare solution sets instead of floating-point samples. Multiplication of variable expressions and variable denominators are rejected; degenerate all/no-solution equations are distinguished.
+- Omitted distribution is identified by replacing a scalar-times-group AST node with the specific unmultiplied-constant error and checking the rest of both sides. This generalizes across coefficients, signs, variables and sides. Ambiguous incorrect steps remain generic; syntax/no-op results have no misconception category.
+- Zod moved into Phase 1 because the new deterministic check endpoint already creates a server boundary. The route replays history; it never trusts a client verdict or uses a model as a math judge.
+- Hint-like UI is a clearly labeled static rule reminder and deterministic checker feedback, not an AI conversation. Chat/composer/provider state is deferred to Phase 2. No follow-up button/generator, learning metrics or local storage is implemented early.
+- The solution survives route changes through a root context provider. Refresh deliberately resets it and the UI says so. Browser persistence and event-based progress remain Phase 3.
+- Current compatible versions installed: Vitest 5.1.0, Vite 8.3.6, KaTeX 0.19.1, Zod 4.6.7, RTL 16.3.3, jsdom 27.4.0 and Playwright 1.65.0. Node minimum is 22.12.0. KaTeX uses a thin owned React wrapper and only parser-generated TeX/fixed rule content with trust disabled. Vite uses current Oxc JSX options, not deprecated esbuild configuration.
+
+### Phase 1 checklist
+
+- [x] Inspect status, reread specifications and inspect both provided images.
+- [x] Working responsive Study input, submit, symbol insertion/deletion, rule reminder, retry/reset and completion.
+- [x] Pure exact math verifier and generalized distribution classification.
+- [x] Node check endpoint with Zod, bounded bodies/history and server recomputation.
+- [x] Math M01–M11 and M13–M16; 100 dynamic coefficient-based test fixtures. M12 is deferred with the actual Phase 3 generator.
+- [x] 54 tests across math, API and component suites; no AI mocks or model calls.
+- [x] Lint, production build and strict TypeScript checks.
+- [x] Responsive web-qa at 1440/1024/768/390/360/375: 30/30 combinations.
+- [x] Real-browser E2E rerun: 6/6 pass after the discovered origin fix.
+- [x] Final docs, cleanup and original-file exclusion review; prepare one verified Phase 1 commit as the final step.
+- [x] Stop before Phase 2 and await explicit approval.
+
+### Verification and regressions
+
+- `npm run test`: 54/54 pass (41 math, 9 API, 4 component tests). Component tests exercise the real route/verifier through an in-process transport, including Enter, sample-fill-only behavior, keypad caret placement, rule toggle, failure/retry, duplicate prevention and reset focus.
+- `npm run lint`: PASS, zero warnings.
+- `npm run build`: PASS with `/api/check-step` as a Node route and all five app pages intact.
+- `npm run typecheck`: PASS, exit 0, rerun after the complete source change set including the origin fix.
+- Owner ran `npm install`: 107 packages added; npm reported 0 vulnerabilities across the installed dependency tree.
+- Web-qa report `/tmp/math-tutor-phase1-web-qa/`: 30/30, 0 blocking findings. Study desktop/tablet/mobile screenshots visually checked; KaTeX is readable, keypad adapts to 4×2, and mobile stacks correctly. Existing no-canonical warnings remain accepted for local noindex pages; production origin is not chosen.
+- The restricted-shell Playwright attempt cannot connect/bind localhost and returned EPERM. The owner ran the real suite in Terminal. Its first run failed 6/6: browser same-origin POSTs were incorrectly rejected with 403 because Next normalized the internal URL to localhost; the retry test also matched Next's extra route-announcer alert.
+- Fixed origin comparison to retain the public Host with the internal request scheme, while continuing to reject different hosts/schemes. Added a regression test with an internal localhost URL and public loopback Host/Origin. Confirmed actual production HTTP statuses: wrong expansion, correction and final-value POSTs now return 200; a foreign Origin still returns 403. These requests are stateless and create no stored test records.
+- Scoped the browser alert locator to the checker message. Also fixed the button's accessible name by hiding its visual Enter shortcut from assistive naming, and return focus to the input after restarting. A direct correct final-value jump is accepted with a suggestion to practise the skipped expansion.
+- Owner reran `npm run test:e2e`: 6/6 PASS in 11.4s across desktop 1440, tablet 768 and mobile 390. `test-results/.last-run.json` independently confirms status `passed` and no failed test IDs. No AI provider was mocked or called.
+- Final cleanup: no listeners on 3000/4173/4321/5173/8787–8789, no `--headless` processes and no web-qa profiles found. Both owned preview servers were stopped; Playwright closed its server/browser. Existing IDE processes were left alone. All 13 original handoff hashes still match and none of those files is tracked.
+
+### Exact Phase 1 change set
+
+27 files added or updated. Original handoff files remain excluded and unchanged.
+
+```text
+.gitignore
+README.md
+docs/IMPLEMENTATION_PROGRESS.md
+package-lock.json
+package.json
+playwright.config.ts
+src/app/api/check-step/route.ts
+src/app/globals.css
+src/app/layout.tsx
+src/app/page.tsx
+src/app/study/page.tsx
+src/components/shell/app-shell.tsx
+src/components/study/math-text.tsx
+src/components/study/study-session.tsx
+src/components/study/study-workspace.tsx
+src/lib/math/contracts.ts
+src/lib/math/format.ts
+src/lib/math/linear.ts
+src/lib/math/parser.ts
+src/lib/math/rational.ts
+src/lib/math/verifier.ts
+tests/api/check-step.test.ts
+tests/components/study-workspace.test.tsx
+tests/e2e/study.spec.ts
+tests/math/verifier.test.ts
+tsconfig.json
+vitest.config.mts
+```
+
 ## Next session
 
-Stop at Phase 0. Only after explicit Phase 1 approval implement the Study equation UI and independent math verifier; do not add real AI or learning events early. Revisit the toolchain EOL and any audit findings before public release.
+After explicit Phase 2 approval, add real server-only AI guidance and the Socratic teaching state machine. Do not add progress persistence or generated practice ahead of Phase 3. Keep the independent math verdict authoritative.
