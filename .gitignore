@@ -1,0 +1,38 @@
+# Local dependencies, generated output and tools
+node_modules/
+.next/
+out/
+dist/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+.idea/
+.vscode/
+.vercel/
+*.log
+
+# Never commit real credentials
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+*.pem
+*.key
+
+# Original handoff files stay local at the owner's request.
+# Keep these explicit: new implementation documentation can be committed.
+/AGENTS.md
+/README_START_HERE.md
+/START_PROMPT_FOR_CODEX.txt
+/docs/01_PRODUCT_SPEC.md
+/docs/02_DESIGN_SYSTEM.md
+/docs/03_AI_MATH_ENGINE.md
+/docs/04_TEST_PLAN.md
+/docs/05_SUBMISSION.md
+/docs/06_CODEX_PHASE_PROMPTS.md
+/design/references/01_dashboard_brandbook.png
+/design/references/02_tutor_brandbook.png
