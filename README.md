@@ -34,7 +34,7 @@ Phase 0 has no domain logic or test suite. Vitest and React Testing Library will
 
 Verified on the production build: lint, strict typecheck, build and all 25 combinations of five routes × five viewport widths pass. Expected HTTP statuses and baseline security headers pass. Interactive keyboard traversal has not been separately automated.
 
-The initial install reported eight moderate dependency vulnerabilities; live advisory details remain unverified in the restricted environment. ESLint 9 is end-of-life but the installed React/accessibility plugins do not declare ESLint 10 compatibility. These are explicit dependency follow-ups, not resolved findings. See [implementation progress](docs/IMPLEMENTATION_PROGRESS.md) for evidence and remaining work.
+The initial audit findings were resolved by a scoped override of the dev-tooling minimatch dependency to 11.0.1. The owner-provided live audit on 2026-11-08 reports zero known vulnerabilities; lint, typecheck, build and parser compatibility checks pass after installation. ESLint 9 remains end-of-life because the installed React/accessibility plugins do not declare ESLint 10 compatibility; review an ecosystem-compatible upgrade before release. See [implementation progress](docs/IMPLEMENTATION_PROGRESS.md) for evidence and remaining work.
 
 ## Structure
 

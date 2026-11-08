@@ -2,7 +2,7 @@
 
 ## Current boundary
 
-Phase 0 only. Phase 1 must wait for the owner's explicit approval. Status: Phase 0 scaffold verified. Lint, strict typecheck, production build and all 25 responsive checks pass. Stopping before Phase 1; dependency audit details and a separately automated keyboard flow remain documented follow-ups.
+Phase 0 only. Phase 1 must wait for the owner's explicit approval. Status: Phase 0 scaffold verified. Lint, strict typecheck, production build and all 25 responsive checks pass. Stopping before Phase 1; the identified dev-tooling advisory is resolved with a zero-finding live audit; a separately automated keyboard flow and the lint ecosystem upgrade remain documented follow-ups.
 
 ## Initial audit — 2026-11-08
 
@@ -111,7 +111,7 @@ tests/                      # Math + API contracts; essential UI flows later
 | --- | --- |
 | Preserve original files | PASS: all 13 SHA-256 hashes match the initial manifest |
 | Original file exclusions | PASS: `git check-ignore` confirms all handoff specs/PNGs; `git ls-files --others --exclude-standard` contains none of the original files |
-| Dependency installation | PASS: owner ran `npm install`; lockfile generated. npm reported 8 moderate vulnerabilities; details are pending, not dismissed. |
+| Dependency installation | PASS: owner ran `npm install`; lockfile generated. npm reported 8 moderate affected packages. The supplied audit was subsequently triaged to one minimatch advisory; see the dependency follow-up below. |
 | `npm run lint` | PASS, exit 0; zero warnings |
 | `npm run typecheck` | PASS, exit 0; Next route types generated and strict TypeScript checked |
 | `npm run build` | PASS, exit 0; Next 16.4.5/Turbopack generated all five app pages, 404 and icon |
@@ -121,8 +121,8 @@ tests/                      # Math + API contracts; essential UI flows later
 | Response headers | `/study` sends nosniff, DENY framing, strict-origin-when-cross-origin and camera/microphone/geolocation restrictions; no X-Powered-By |
 | Interactive keyboard flow | NOT AUTOMATED: semantic links, skip link and focus styling exist; QA covers layout/console/request failures, not a full keyboard traversal |
 | AI/domain tests | NOT APPLICABLE in Phase 0; no model calls, parser, learning events, forms or chat exist. Meaningful unit/interaction tests begin with those features. |
-| Live dependency audit | UNVERIFIED: shell registry access returns ENOTFOUND. Offline audit returned an empty result and is not evidence that the owner's reported findings are resolved. Requested a fresh JSON audit from the owner's unrestricted Terminal. |
-| Source control | 26 new files staged and reviewed; `git diff --cached --check` passes; no original handoff files, real environment files or generated builds are included. The final Conventional Commit is the last task step; inspect `git log -1` for its ID. No push/deploy attempted. |
+| Dependency audit | PASS after scoped override: owner-provided live `/tmp/math-tutor-audit-after.json` reports 0 findings across all severity levels. Confirmed installed minimatch 11.0.1 in the affected dev chain; see follow-up below. |
+| Source control | Foundation committed as `e62e8f1` with 26 new files. The dependency follow-up changes only package.json, package-lock.json, README.md and this progress document. Original handoff files, real environment files and generated builds remain excluded. No push/deploy attempted. |
 | Cleanup | Production server stopped after checks. Final `lsof -nP -iTCP -sTCP:LISTEN` shows no listeners on 3000/4173/4321/5173/8787–8789; `pgrep -fl web-qa-profile` returns no matches. Existing IDE services were left alone. |
 
 ### Responsive evidence and accepted deviations
@@ -184,6 +184,40 @@ tsconfig.json
 - [Next.js registry metadata](https://registry.npmjs.org/next/latest)
 - [React registry metadata](https://registry.npmjs.org/react/latest)
 - [Tailwind registry metadata](https://registry.npmjs.org/tailwindcss/latest)
+
+## Phase 0 dependency follow-up — 2026-11-08
+
+Scope: inspect the owner-provided npm audit report and fix its reported tooling dependency chain. This is not a full application security audit and does not authorize Phase 1. The security-review skill is applied only to dependency triage.
+
+Applicability: Next/React/TypeScript browser scaffold and npm supply chain apply; the affected package belongs to development tooling. Database, login/authorization, payments, AI calls and production infrastructure are absent or outside this check. No real secret files or production services are accessed.
+
+### Finding
+
+The owner-provided `/tmp/math-tutor-audit.json` reports 8 moderate affected packages but one underlying advisory: [GHSA-g3hv-75wg-m249 / CVE-2026-118764](https://github.com/advisories/GHSA-g3hv-75wg-m249). The dependency path is `eslint-config-next → typescript-eslint → @typescript-eslint/typescript-estree → minimatch@10.2.6`. The remaining entries propagate that affected dependency.
+
+The advisory describes excessive CPU/memory consumption from attacker-controlled glob patterns with optimization level 2 or higher, affecting minimatch `>=7.0.0 <11.0.1`. `npm ls minimatch --omit=dev` returns an empty tree. This project does not accept glob patterns from browser users and does not import the linter in application routes; current exposure is in development tooling, not a demonstrated remotely exploitable Phase 0 endpoint.
+
+### Applied scoped fix
+
+Added npm's documented nested `overrides` to replace only `minimatch` beneath `@typescript-eslint/typescript-estree@8.72.1` with exact version `11.0.1`. The installed tree and lockfile confirm the replacement and its one additional transitive dependency, `@isaacs/nonrecursive-glob-match@1.1.0`. Separate minimatch 3.x consumers remain unchanged: they are outside this advisory and have a different API. The suggested forced eslint-config-next downgrade was not applied; Next and eslint-config-next remain matched at 16.4.5.
+
+Upstream 11.0.1 retains CommonJS/ESM exports and supports Node `18 || 20 || >=22`; the installed typescript-estree uses the named `minimatch(filePath, pattern, { dot: true })` export in its project-service allowlist path. The installed compatibility check below verifies the major-version override at the actual parser call site. Remove/review the narrowly scoped override when upstream updates this dependency or typescript-estree changes version.
+
+Sources: [advisory](https://github.com/advisories/GHSA-g3hv-75wg-m249), [patched package manifest](https://raw.githubusercontent.com/isaacs/minimatch/v11.0.1/package.json), [npm overrides documentation](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/#overrides).
+
+### Follow-up verification
+
+- Owner ran `npm install`: 1 package added, 1 changed; npm audited 442 packages and reported zero vulnerabilities.
+- Read the fresh `/tmp/math-tutor-audit-after.json`: empty vulnerabilities object, all severity counts zero. This is the owner-provided live result, not the earlier offline empty result.
+- `npm ls minimatch --all`: targeted typescript-estree dependency is 11.0.1 and overridden; other consumers remain at 3.1.5, with no invalid tree entries.
+- `node /tmp/math-tutor-tooling-compat.cjs`: PASS, six matching cases (recursive globs, dotfiles, brace alternatives and nonmatches), plus the actual `@typescript-eslint/parser.parseForESLint` project-service `allowDefaultProject` path. A real temporary JavaScript file/tsconfig produced a TypeScript program and AST. Temporary fixtures were removed in `finally`.
+- `npm run lint`: PASS, exit 0, zero warnings.
+- `npm run typecheck`: PASS, exit 0.
+- `npm run build`: PASS, exit 0; same five application routes, 404 and icon generated.
+- No UI/source files changed. The existing 25/25 responsive checks remain applicable; no redundant browser run or server was started for this tooling-only change.
+- All 13 original handoff file hashes remain unchanged. Only the four dependency/documentation files listed above belong in this follow-up commit.
+
+The known ESLint 9 end-of-life limitation remains separate from the resolved advisory and is not concealed by the clean audit. No paid API calls, production data, global installs, push or deployment occurred.
 
 ## Next session
 
