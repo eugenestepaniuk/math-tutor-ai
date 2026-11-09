@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { MAX_EQUATION_LENGTH } from "./parser";
+import { ProblemRef } from "@/lib/practice/problems";
 
 export const MAX_ACCEPTED_STEPS = 48;
 export const CheckStepRequest = z.object({
+  problem: ProblemRef.optional(),
   acceptedSteps: z.array(z.string().min(1).max(MAX_EQUATION_LENGTH)).max(MAX_ACCEPTED_STEPS),
   equation: z.string().max(MAX_EQUATION_LENGTH),
 }).strict();

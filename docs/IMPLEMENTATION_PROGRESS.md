@@ -2,7 +2,7 @@
 
 ## Current boundary
 
-Phase 2 was explicitly approved by the owner. The server-only OpenAI adapter, two-way chat and teaching state machine are implemented. Lint, strict typecheck, production build, 100 automated unit/API/component/SDK tests and 30 read-only responsive combinations pass. All 12 browser scenarios passed in the owner's Terminal. The owner approved one paid live smoke request and continuation to Phase 3 on 2026-11-09. The sandbox could not connect to localhost, so no provider call occurred; the owner-terminal smoke result remains NOT VERIFIED. Test fixtures do not establish real AI functionality.
+Phase 3 was approved by the owner on 2026-11-09 after Phase 2 commit `5b50a3b`. Related practice, real event statistics and versioned local persistence are implemented. Phase 3 is complete: 119 unit/API/component/SDK tests, lint, strict typecheck, production build and all 21 owner-terminal browser scenarios pass. Fresh responsive QA passes 30 combinations, and populated visual review passes 18 combinations. Successful live AI remains NOT VERIFIED: one approved production-route attempt returned `provider_limit` (OpenAI 429), with no tutor prose and no automatic retry. Phase 4 is not authorized.
 
 ## Initial audit — 2026-11-08
 
@@ -389,6 +389,101 @@ tests/tutor/smoke-opt-in.test.ts
 vitest.config.mts
 ```
 
+
+## Phase 3 — related practice and persistent learning
+
+### Scope and implementation plan
+
+1. Add a pure bounded seeded equation generator with independent verification and repeat exclusion.
+2. Share an explicit problem reference across checker/tutor boundaries; reconstruct and verify it on the server.
+3. Track actual checked attempts, corrections, hints, completions and transfer outcomes with deduplicated events.
+4. Persist separate Study/Practice sessions, raw actions, drafts and chat through a versioned validated browser document.
+5. Reuse the Study workspace for Practice and build real-data Progress with honest empty states and a confirmed reset.
+6. Verify M12, replay/storage/error contracts, full browser reference flow and responsive states. Stop before Phase 4.
+
+```text
+src/lib/practice/problems.ts         # Reproducible verified problems
+src/lib/learning/{events,storage}.ts  # Pure event statistics and versioned snapshots
+src/components/learning/
+  learning-provider.tsx              # Safe restore/save and shared local data
+  practice-view.tsx                  # Reused workspace and new-equation controls
+  progress-view.tsx                  # Real metrics and explicit reset
+src/components/study/study-session.tsx # Separate controllers over persisted data
+```
+
+### Decisions and boundaries
+
+- No additional dependency, install, deployment or push. All original handoff files stay excluded.
+- Related practice is offered on a correction, before main-equation completion, and highlighted afterward. Accepted steps still requiring expansion do not clear a distribution misconception.
+- Both APIs and the tutor prompt use the actual generated equation, never a client verdict or a hardcoded starter in place of practice.
+- The generator prefers positive examples, retains genuinely varied negative examples and verifies a unique bounded integer answer. New generation excludes all seen equations and the starter.
+- Statistics derive only from checked event data. Syntax/no-op input cannot create misconception categories. Retry IDs deduplicate events, accepted steps and delivered hints. Completion counts unique equations.
+- Saved data is anonymous and browser-local, not an authenticated learning record or calibrated mastery estimate. Unknown versions/corruption are preserved; quota/blocking/cross-tab changes show an honest notice. No model call or submission occurs on restore.
+- Full storage semantics, metric denominators, limits and reset behavior: `docs/LEARNING_PROGRESS.md`.
+
+### Verification results
+
+- Unit/API/component/SDK tests: 119/119 PASS across 11 suites, including correction timing, generation weighting, persisted hint retry counts and safe smoke-configuration diagnostics.
+- Lint: PASS with zero warnings. Strict typecheck: PASS including all 21 browser scenario definitions.
+- Production build: PASS after all application and test-fixture changes; both API routes use the Node runtime and all five pages build successfully.
+- Fresh responsive states: 30/30 across five routes at 1440/1024/768/390/360/375. No blocking findings; five accepted local canonical warnings. Reports: `/tmp/math-tutor-phase3-web-qa/`.
+- Populated responsive checks: PASS for Study/Practice/Progress at all six widths (18 combinations). Portable Playwright scenarios used disposable schema-validated browser data, asserted no POSTs, no horizontal overflow and touch inputs at least 16px, and saved full-page screenshots. The web-qa reviewer inspected all 18 captures: no blocking defects. Evidence: `test-results/learning-populated-learnin-56961-ut-submitting-or-calling-AI-{desktop,tablet,mobile}/populated-{study,practice,progress}-{width}.png`. Optional Phase 4 polish: add a 16px gap above the related-practice card; the current zero gap does not block interaction.
+- Browser suite: owner ran `npm run test:e2e` in unrestricted Terminal: 21/21 PASS in 33.2 seconds on desktop/tablet/mobile. Covers the full mock-provider correction/transfer flow, actual generated expansion and completion, refresh-persistent history/drafts, repeat avoidance, confirmed reset, failures/retries and populated responsive states. `test-results/.last-run.json` confirms `passed` with no failed IDs. The local sandbox attempt failed before tests with `listen EPERM`; the owner-terminal run supplies actual execution evidence. No live AI request was made by the suite.
+- Final preservation/cleanup: all 13 original SHA-256 hashes match and none of those files is tracked. `.env.local` stays ignored/untracked. Client static chunks contain no OpenAI API-key/endpoint identifiers. No listeners remain on 3000/4173/4321/5173/8787–8789 and no headless Chrome remains; existing IDE processes were left alone. Test history exists only in jsdom/disposable Playwright/QA browsers; no production records were created.
+- Live AI: one approved request was made after a public configuration GET confirmed enabled/configured. The real SDK produced normalized `provider_limit` (429); the local route retained an independent distribution verdict and a transparent unavailable envelope. No model prose, source or premature example appeared. Successful live teaching remains NOT VERIFIED. Raw secrets and raw SDK errors were not inspected. Do not automatically repeat the request; account rate/quota/credits need owner review first.
+
+### Checklist
+
+- [x] Generator and strict problem contracts; independent server reconstruction.
+- [x] Deduplicated events, metric derivation and correction/follow-up timing.
+- [x] Reload-persistent sessions/drafts/chat and safe storage failures/reset.
+- [x] Reused Practice workspace and functional Progress.
+- [x] 119 unit/API/component/SDK tests and 21 real-browser scenarios pass.
+- [x] Fresh responsive QA at all six widths.
+- [x] Final checks, 18 populated visual states, owner-terminal E2E result and documentation evidence.
+- [x] Verified Phase 3 change set included in this commit; no push or deployment.
+- [x] Stop before Phase 4; new owner approval is required.
+
+### Exact Phase 3 change set
+
+33 source/configuration/documentation/test files added or updated. Original handoff files and real secret files are excluded.
+
+```text
+README.md
+docs/AI_INTEGRATION.md
+docs/IMPLEMENTATION_PROGRESS.md
+docs/LEARNING_PROGRESS.md
+scripts/smoke-tutor.mjs
+src/app/api/check-step/route.ts
+src/app/globals.css
+src/app/page.tsx
+src/app/practice/page.tsx
+src/app/progress/page.tsx
+src/components/learning/learning-provider.tsx
+src/components/learning/practice-view.tsx
+src/components/learning/progress-view.tsx
+src/components/shell/app-shell.tsx
+src/components/study/study-session.tsx
+src/components/study/study-workspace.tsx
+src/lib/learning/events.ts
+src/lib/learning/storage.ts
+src/lib/math/contracts.ts
+src/lib/practice/problems.ts
+src/lib/tutor/contracts.ts
+src/lib/tutor/policy.ts
+src/lib/tutor/prompt.ts
+tests/components/learning-flow.test.tsx
+tests/components/study-workspace.test.tsx
+tests/components/tutor-chat.test.tsx
+tests/e2e/learning.spec.ts
+tests/e2e/tutor.spec.ts
+tests/fixtures/browser-tutor.ts
+tests/fixtures/learning.ts
+tests/learning/events-storage.test.ts
+tests/learning/problems.test.ts
+tests/tutor/smoke-opt-in.test.ts
+```
+
 ## Next session
 
-Phase 3 is authorized: implement verified related problems and persisted learning events. The separately approved live smoke check remains NOT VERIFIED until the owner supplies the unrestricted Terminal result. The math engine remains authoritative.
+Phase 3 is complete and verified. With new owner approval, start Phase 4 from `docs/06_CODEX_PHASE_PROMPTS.md`: Home/Curriculum design and supporting-view polish; include the related-card spacing follow-up. The live attempt remains honestly provider-limited, so a successful real-AI check still requires restored API access and a separately approved new request. Do not repeat paid calls automatically, inspect real secret files, push or deploy without authorization.

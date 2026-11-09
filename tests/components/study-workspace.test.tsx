@@ -14,6 +14,7 @@ const serverTransport = async (url: unknown, init?: RequestInit) => String(url) 
 const postCalls = () => vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "POST");
 
 beforeEach(() => {
+  window.localStorage.clear();
   vi.stubGlobal("fetch", vi.fn(serverTransport));
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => setTimeout(() => callback(0), 0));
 });
@@ -45,6 +46,7 @@ describe("Study interaction with real verifier and an in-process API transport",
   it("supports keypad insertion at the cursor and a clearly labeled rule reminder", async () => {
     const user = userEvent.setup(); mount();
     const input = screen.getByLabelText<HTMLInputElement>("Your next step");
+    await waitFor(() => expect(input).toBeEnabled());
     await user.type(input, "3x"); input.setSelectionRange(1, 1);
     await user.click(screen.getByRole("button", { name: "Insert plus" }));
     await waitFor(() => expect(input).toHaveValue("3+x"));
@@ -62,6 +64,7 @@ describe("Study interaction with real verifier and an in-process API transport",
     });
     const user = userEvent.setup(); mount();
     const input = screen.getByLabelText("Your next step");
+    await waitFor(() => expect(input).toBeEnabled());
     await user.type(input, "x=7{Enter}");
     expect(await screen.findByRole("alert")).toHaveTextContent("checker is unavailable");
     expect(input).toHaveValue("x=7");
@@ -73,6 +76,7 @@ describe("Study interaction with real verifier and an in-process API transport",
     vi.mocked(fetch).mockImplementation((url, init) => init?.method === "POST"
       ? new Promise<Response>(done => { resolve = done; }) : serverTransport(url, init));
     const user = userEvent.setup(); mount();
+    await waitFor(() => expect(screen.getByLabelText("Your next step")).toBeEnabled());
     await user.type(screen.getByLabelText("Your next step"), "x=7");
     const button = screen.getByRole("button", { name: "Check My Step" });
     await user.dblClick(button);

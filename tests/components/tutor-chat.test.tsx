@@ -10,9 +10,12 @@ import type { TutorRequest } from "@/lib/tutor/contracts";
 import { StudyWorkspace } from "@/components/study/study-workspace";
 import { StudySessionProvider } from "@/components/study/study-session";
 import { fixtureReply } from "../fixtures/tutor";
+import { learningStats } from "@/lib/learning/events";
+import { STORAGE_KEY } from "@/lib/learning/storage";
 
 const generate = vi.fn(async (_request: TutorRequest, context: TeachingContext) => fixtureReply(context));
 beforeEach(() => {
+  window.localStorage.clear();
   generate.mockReset();
   generate.mockImplementation(async (_request, context) => fixtureReply(context));
   const tutor = createTutorHandler({ configuration: () => ({ enabled: true, configured: true }), generate });
@@ -43,6 +46,7 @@ describe("Tutor UI using mock providers and the real teaching service", () => {
     await user.click(screen.getByRole("button", { name: "Show worked step" }));
     await waitFor(() => expect(screen.getByRole("button", { name: "Hint limit reached" })).toBeDisabled());
     expect(generate.mock.calls.at(-1)![1].state.hintLevel).toBe(3);
+    expect(learningStats(JSON.parse(window.localStorage.getItem(STORAGE_KEY)!).events).hints).toBe(3);
   });
   it("answers chat without changing the math draft or counting an algebra attempt", async () => {
     const user = userEvent.setup(); mount();
@@ -81,5 +85,20 @@ describe("Tutor UI using mock providers and the real teaching service", () => {
     await user.click(screen.getByRole("button", { name: "Retry AI guidance" }));
     await waitFor(() => expect(math).toHaveValue(""));
     expect(screen.getByText("1 accepted step", { exact: true })).toBeVisible();
+    expect(learningStats(JSON.parse(window.localStorage.getItem(STORAGE_KEY)!).events).attempts).toBe(1);
+  });
+  it("does not count an unavailable hint and records its successful retry once", async () => {
+    generate.mockRejectedValueOnce(new TutorProviderError("timeout"));
+    const user = userEvent.setup(); mount(); await screen.findByText("Not connected yet");
+    await user.click(screen.getByRole("button", { name: /^Hint$/ }));
+    await screen.findByRole("alert");
+    let saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY)!);
+    expect(saved.study.history.filter((action: { kind: string }) => action.kind === "request_hint")).toHaveLength(0);
+    expect(learningStats(saved.events).hints).toBe(0);
+    await user.click(screen.getByRole("button", { name: "Retry AI guidance" }));
+    await screen.findByText("Use the distributive property to apply the outside factor to each term.");
+    saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY)!);
+    expect(saved.study.history.filter((action: { kind: string }) => action.kind === "request_hint")).toHaveLength(1);
+    expect(learningStats(saved.events)).toMatchObject({ hints: 1, attempts: 0 });
   });
 });

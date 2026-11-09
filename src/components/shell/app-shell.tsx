@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { Brand } from "@/components/ui/brand";
 import { navigation } from "@/lib/navigation";
+import { StorageNotice } from "@/components/learning/learning-provider";
 
 function Navigation({ mobile = false }: { mobile?: boolean }) {
   const pathname = usePathname();
@@ -50,6 +51,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="guest-label"><CircleUserRound size={20} aria-hidden="true" /><span>Guest</span></div>
         </header>
         <main id="main-content" className="main-content" tabIndex={-1}>
+          <StorageNotice />
           {children}
         </main>
         <footer className="workspace-footer"><span>MathTutor AI</span><span>Workspace preview</span></footer>

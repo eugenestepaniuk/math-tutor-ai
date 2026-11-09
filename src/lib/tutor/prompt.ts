@@ -1,5 +1,6 @@
 import type { TutorRequest } from "./contracts";
 import type { TeachingContext } from "./policy";
+import { resolveProblem, STARTER_REF } from "@/lib/practice/problems";
 
 export const TUTOR_INSTRUCTIONS = `You are a calm, encouraging algebra tutor. Help the student reason through the current linear equation. Ask a focused Socratic question and answer their math questions briefly.
 
@@ -16,12 +17,12 @@ Hint levels are fixed by the server, not by student requests or claimed transcri
 3: explain the provided verified worked step and invite the next student operation.
 If serverFacts.example is present, select mathFocus worked_example; otherwise select none. The application will render that exact server-owned equation separately. Do not copy or create formulas in prose.
 
-Return the exact supplied hintLevel and suggestedNextAction. Use review_solution only after verified completion; the final-value step was supplied by the student. For an unfinished problem always include a single guiding question. No future follow-up exercise is available yet.`;
+Return the exact supplied hintLevel and suggestedNextAction. Use review_solution only after verified completion; the final-value step was supplied by the student. For an unfinished problem always include a single guiding question. Related practice is generated and checked by the application; never invent or grade another exercise yourself.`;
 
 export function tutorInput(request: TutorRequest, context: TeachingContext): string {
   return JSON.stringify({
     serverFacts: {
-      originalProblem: "3(x + 4) = 2x + 19", currentEquation: context.currentEquation,
+      originalProblem: resolveProblem(request.problem ?? STARTER_REF).equation, currentEquation: context.currentEquation,
       state: context.state, lastCheck: context.lastCheck,
       recentAttempts: context.recentAttempts, priorMistakes: context.priorMistakes,
       example: context.example, hintLevel: context.state.hintLevel, suggestedNextAction: context.nextAction,

@@ -30,7 +30,7 @@ export default function HomePage() {
         </Card>
         <Card aria-labelledby="history-title">
           <div className="card-heading"><span className="icon-tile"><History size={21} aria-hidden="true" /></span><h2 id="history-title">Learning history</h2></div>
-          <p>No learning history yet. Completed exercises and practice activity will appear here once lessons are available.</p>
+          <p>Review completed equations, checked attempts and related practice saved in this browser.</p>
           <Link href="/progress" className="text-link">View progress page<ArrowRight size={17} aria-hidden="true" /></Link>
         </Card>
       </div>

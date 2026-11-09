@@ -1,5 +1,6 @@
 import { PublicCheckResult, type StepFeedback } from "@/lib/math/contracts";
-import { checkStep, STARTER_EQUATION } from "@/lib/math/verifier";
+import { checkStep } from "@/lib/math/verifier";
+import { resolveProblem, STARTER_REF } from "@/lib/practice/problems";
 import { RequestError } from "@/lib/server/http";
 import { type TeachingState, type TutorRequest, TutorReply } from "./contracts";
 import { verifiedExample } from "./examples";
@@ -17,7 +18,7 @@ export type TeachingContext = {
 };
 
 export function teachingContext(request: TutorRequest): TeachingContext {
-  let current = STARTER_EQUATION;
+  let current = resolveProblem(request.problem ?? STARTER_REF).equation;
   const state: TeachingState = { phase: "awaiting_step", hintLevel: 0, acceptedSteps: 0 };
   let lastCheck: StepFeedback | null = null;
   let repeatedMistakes = 0;

@@ -4,9 +4,13 @@
 
 The production code uses the official OpenAI Node SDK and Responses Structured Outputs. No mock provider is reachable through a runtime flag or production route. Unit/component/browser tests inject providers only from `tests/`.
 
-A real API smoke test is **not yet verified**. On 2026-11-09 the owner approved one paid request, but sandbox localhost access prevented the smoke script from reaching the local server; no provider request was made. The unrestricted Terminal result is pending. Test fixtures are not proof of live AI availability, model access or teaching quality. The default requested model remains `gpt-6-luna`; the app never silently substitutes another model.
+A successful real AI response is **NOT VERIFIED**. On 2026-11-09, initial configuration checks stopped with AI disabled and made no provider call. After the owner configured a key and `TUTOR_ENABLED=true`, public `GET /api/tutor` confirmed both booleans. One explicitly approved request through the real production route reached the SDK and returned the normalized `provider_limit` result (the adapter maps OpenAI HTTP 429 to this code). No tutor prose was produced and no automatic retry occurred. Configuration and mocked tests do not establish live teaching functionality. The default requested model remains `gpt-6-luna`; no silent substitution is made.
 
-Phase 2 adds chat and gradual hints. Related practice generation, persistent learning events and progress metrics still belong to Phase 3. The current solution and conversation stay in memory across route changes and reset on refresh.
+The local contract correctly retained the independent `incorrect` / `distribution` verdict and hint level zero with no model source or worked example. Local HTTP 200 is the successfully delivered application error envelope, **not** provider success. Evidence is in `/tmp/math-tutor-live-result.json`, with a key-free client-to-local-server transport trace. Real secret files were never inspected.
+
+The adapter currently normalizes rate/quota failures together, so the exact provider subcode is unknown. Official [OpenAI error documentation](https://developers.openai.com/api/docs/guides/error-codes) distinguishes temporary request limits, exhausted credits and organization/project usage or spend limits. Check the relevant API account configuration before authorizing another live attempt. Replacing a key alone does not establish quota availability.
+
+Phase 2 adds chat and gradual hints. Phase 3 adds independently generated related practice and versioned browser history. Both sessions persist across refresh; see `LEARNING_PROGRESS.md`. Restoring saved data never calls the model.
 
 ## Local configuration and one-request smoke test
 
@@ -29,7 +33,7 @@ The API key needs separate OpenAI API access/billing. A successful request is th
 
 - `/api/check-step` remains the fast independent checker. Its shared HTTP helper bounds streamed input and verifies the browser-facing origin.
 - `/api/tutor` accepts a current action, a bounded action history and a short transcript. Actions are `submit_step`, `request_hint` and `ask_question`, each with a unique ID.
-- The server replays raw equations from the trusted starter using the restricted verifier. It ignores client claims of correctness and computes the state, accepted-step count, recent mistakes and permitted hint level itself.
+- The server replays raw equations from the independently reconstructed starter/generated problem using the restricted verifier. It ignores client claims of correctness and computes the state, accepted-step count, recent mistakes and permitted hint level itself.
 - Client-provided transcript roles are quoted context, not system/assistant instructions or authoritative math. The model receives a stable instruction message, independently checked facts and explicitly untrusted student context. The internal canonical answer is omitted.
 - The model returns schema-constrained prose, a guiding question, the fixed hint level, a permitted next-action tag and a choice of whether to show the server-provided example. It never supplies a mathematical verdict or arbitrary formula.
 - Every displayed worked example is computed and checked independently. Prose is screened for grading contradictions, numeric/number-word answer leaks, unsupported markup, premature examples and mismatched state metadata. Rejected output is explicitly labeled verified/checker guidance, not an AI answer.
@@ -43,10 +47,10 @@ The prose guard is deliberately conservative and heuristic. It does not prove ev
 - Hint level 1: name the relevant rule and ask a focused question.
 - Hint level 2: show an independently verified, unfinished local operation, leaving arithmetic to the student.
 - Hint level 3: explicitly requested **Show worked step**, with one independently verified next step. It does not automatically complete the exercise; the student must still submit a valid solution.
-- Accepted correction: `next_step`, hint depth resets. Verified final value: `completed`; questions can review the solution, but no generated follow-up is offered yet.
+- Accepted correction: `next_step`, hint depth resets. Verified final value: `completed`; questions can review the solution, and the application offers independently verified related practice.
 - Free questions do not change the mathematical state. Failed hints are not added to the client's delivered-hint history; retry uses the original request snapshot.
 
-History is replayable client-supplied session data, not a cryptographically attested learning record. Mathematical claims are recomputed; an intentionally forged prior hint sequence is not an authentication boundary. Durable events and storage are future work.
+History is replayable client-supplied session data, not a cryptographically attested learning record. Mathematical claims are recomputed; an intentionally forged prior hint sequence is not an authentication boundary. Versioned local events/storage are implemented in Phase 3; authenticated durable records remain future work.
 
 ## Errors, retries and limits
 

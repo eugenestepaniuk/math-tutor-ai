@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { PublicCheckResult } from "@/lib/math/contracts";
 import { MAX_EQUATION_LENGTH } from "@/lib/math/parser";
+import { ProblemRef } from "@/lib/practice/problems";
 
 export const MAX_TUTOR_ACTIONS = 64;
 const id = z.string().uuid();
@@ -12,6 +13,7 @@ export const TutorAction = z.discriminatedUnion("kind", [
 export type TutorAction = z.infer<typeof TutorAction>;
 
 export const TutorRequest = z.object({
+  problem: ProblemRef.optional(),
   history: z.array(TutorAction).max(MAX_TUTOR_ACTIONS - 1),
   action: TutorAction,
   transcript: z.array(z.object({ role: z.enum(["student", "tutor"]), text: z.string().max(900) }).strict()).max(8),
@@ -56,10 +58,9 @@ export const TutorResponse = z.object({
 export type TutorResponse = z.infer<typeof TutorResponse>;
 export const TutorAvailability = z.object({ enabled: z.boolean(), configured: z.boolean() });
 
-export type ChatMessage = {
-  id: string;
-  role: "student" | "tutor" | "checker";
-  text: string;
-  equation?: string;
-  guidingQuestion?: string | null;
-};
+export const ChatMessage = z.object({
+  id: z.string().min(1).max(100), role: z.enum(["student", "tutor", "checker"]),
+  text: z.string().max(900), equation: z.string().max(MAX_EQUATION_LENGTH).optional(),
+  guidingQuestion: z.string().max(240).nullable().optional(),
+}).strict();
+export type ChatMessage = z.infer<typeof ChatMessage>;

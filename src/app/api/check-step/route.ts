@@ -1,5 +1,6 @@
 import { CheckStepRequest, CheckStepResponse } from "@/lib/math/contracts";
-import { checkStep, STARTER_EQUATION } from "@/lib/math/verifier";
+import { checkStep } from "@/lib/math/verifier";
+import { resolveProblem, STARTER_REF } from "@/lib/practice/problems";
 import { jsonReply as reply, readJsonBody, RequestError, requireJsonRequest } from "@/lib/server/http";
 
 export const runtime = "nodejs";
@@ -11,7 +12,7 @@ export async function POST(request: Request): Promise<Response> {
     const json = await readJsonBody(request, MAX_BODY_BYTES);
     const parsed = CheckStepRequest.safeParse(json);
     if (!parsed.success) return reply({ error: "Use a single equation of up to 256 characters and at most 48 accepted steps." }, 400);
-    let current = STARTER_EQUATION;
+    let current = resolveProblem(parsed.data.problem ?? STARTER_REF).equation;
     for (const accepted of parsed.data.acceptedSteps) {
       const verified = checkStep(current, accepted);
       if (!verified.canAdvance) return reply({ error: "Your step history could not be verified. Start the problem again." }, 409);

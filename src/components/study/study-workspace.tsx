@@ -2,10 +2,11 @@
 
 import { ArrowRight, BookOpen, Bot, Check, CheckCircle2, ChevronRight, CircleAlert, CornerDownLeft, Delete, Divide, Lightbulb, LoaderCircle, Minus, Plus, RotateCcw, Send, X } from "lucide-react";
 import { useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { MAX_ACCEPTED_STEPS } from "@/lib/math/contracts";
 import { MAX_EQUATION_LENGTH } from "@/lib/math/parser";
-import { STARTER_EQUATION } from "@/lib/math/verifier";
+import { useLearning } from "@/components/learning/learning-provider";
 import { DistributiveRule, MathText } from "./math-text";
 import { useStudySession } from "./study-session";
 import { TutorChat } from "./tutor-chat";
@@ -13,8 +14,9 @@ import { TutorChat } from "./tutor-chat";
 const stageLabels = { expand: "Expand the brackets", combine: "Bring the variable terms together", isolate: "Isolate the variable", check: "Check the value" };
 const stagePrompts = { expand: "Apply the outside factor to every term inside the brackets.", combine: "Choose an operation that simplifies the variable terms on both sides.", isolate: "Use the same operation on both sides to leave the variable on its own.", check: "Substitute your value into the original equation to see that both sides agree." };
 
-export function StudyWorkspace() {
+export function StudyWorkspace({ practice = false }: { practice?: boolean }) {
   const session = useStudySession();
+  const learning = useLearning();
   const { acceptedSteps, draft, setDraft, feedback, pending, networkError } = session;
   const [ruleOpen, setRuleOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
@@ -22,7 +24,7 @@ export function StudyWorkspace() {
   const completion = useRef<HTMLDivElement>(null);
   const complete = feedback?.isComplete ?? false;
   const limitReached = acceptedSteps.length >= MAX_ACCEPTED_STEPS || session.full;
-  const current = acceptedSteps.at(-1) ?? STARTER_EQUATION;
+  const current = acceptedSteps.at(-1) ?? session.problem.equation;
   const stage = feedback?.canAdvance ? feedback.stage : acceptedSteps.length ? (feedback?.stage ?? "combine") : "expand";
   const invalid = !!feedback && feedback.submittedEquation === draft && (feedback.verdict === "incorrect" || feedback.parseStatus !== "valid");
 
@@ -61,37 +63,42 @@ export function StudyWorkspace() {
   return (
     <>
       <header className="lesson-heading">
-        <div><p className="eyebrow">Linear equations</p><h1>Understand every step.</h1><p className="page-description">Try a step. Check your reasoning. Keep going.</p></div>
+        <div><p className="eyebrow">{practice ? "Related algebra practice" : "Linear equations"}</p><h1>{practice ? "Put the idea into practice." : "Understand every step."}</h1><p className="page-description">Try a step. Check your reasoning. Keep going.</p></div>
         <span className="lesson-tag"><BookOpen size={16} aria-hidden="true" /> Distributive property</span>
       </header>
       <div className="study-grid lesson-grid">
         <div className="problem-column">
           <Card className="solve-card" aria-labelledby="problem-title">
-            <div className="task-heading"><span className="status-tag status-tag-blue">Your task</span><span className="lesson-level">Intro algebra</span></div>
+            <div className="task-heading"><span className="status-tag status-tag-blue">{practice ? "Practice task" : "Your task"}</span><span className="lesson-level">{session.problem.difficulty} algebra</span></div>
             <h2 id="problem-title">Solve the equation</h2>
-            <div className="equation-display" tabIndex={0} aria-label="Original problem"><MathText equation={STARTER_EQUATION} /></div>
+            <div className="equation-display" tabIndex={0} aria-label="Original problem"><MathText equation={session.problem.equation} /></div>
             {acceptedSteps.length > 0 && !complete && <div className="current-line"><span>Continue from your last step</span><div className="math-scroll"><MathText equation={current} /></div></div>}
 
             {complete ? (
               <div className="completion-panel" tabIndex={-1} ref={completion} aria-labelledby="completion-title">
                 <CheckCircle2 size={30} aria-hidden="true" /><h3 id="completion-title">Nice work. Equation solved!</h3>
-                <div className="math-scroll"><MathText equation={current} /></div><p>Your value is mathematically verified. Review your reasoning below, or try this equation again.</p>
+                <div className="math-scroll"><MathText equation={current} /></div><p>Your value is mathematically verified. Review your reasoning below, or keep practising.</p>
                 <button className="button button-secondary" onClick={restart}><RotateCcw size={17} aria-hidden="true" />Try again</button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} aria-busy={pending}>
-                <div className="solution-label"><label htmlFor="solution-step">Your next step</label><button type="button" className="sample-button" disabled={pending} onClick={() => { setDraft("3x + 4 = 2x + 19"); input.current?.focus(); }}>Try sample mistake<ArrowRight size={14} aria-hidden="true" /></button></div>
+                <div className="solution-label"><label htmlFor="solution-step">Your next step</label>{!practice && <button type="button" className="sample-button" disabled={pending} onClick={() => { setDraft("3x + 4 = 2x + 19"); input.current?.focus(); }}>Try sample mistake<ArrowRight size={14} aria-hidden="true" /></button>}</div>
                 <input ref={input} id="solution-step" className="equation-input" type="text" value={draft} onChange={event => setDraft(event.target.value)} placeholder="Type your next equation" maxLength={MAX_EQUATION_LENGTH} autoComplete="off" autoCapitalize="off" spellCheck={false} disabled={pending || limitReached} aria-invalid={invalid} aria-describedby={`equation-help${invalid ? " equation-error" : ""}`} />
-                <p id="equation-help" className="equation-help">Use x, integers, +, −, *, / and brackets. Include both sides of the equation.</p>
+                <p id="equation-help" className="equation-help">Use {session.problem.variable}, integers, +, −, *, / and brackets. Include both sides of the equation.</p>
                 {invalid && <p id="equation-error" className="inline-math-error"><CircleAlert size={16} aria-hidden="true" />{feedback?.title}. Your last accepted step is unchanged.</p>}
                 <div className="math-keypad" aria-label="Equation symbols">{controls.map(({ value, label, icon: Icon }) => <button key={label} type="button" aria-label={label} disabled={pending || limitReached} onClick={() => insert(value)}>{Icon ? <Icon size={18} aria-hidden="true" /> : value}</button>)}</div>
                 {networkError && <p className="network-error" role="alert">{networkError}</p>}
                 {limitReached && <p className="network-error" role="status">This session has reached its interaction limit. Start again to continue.</p>}
-                <button type="submit" className="button button-primary check-step-button" disabled={pending || limitReached}>{pending ? <LoaderCircle size={19} className="spinner" aria-hidden="true" /> : <Send size={19} aria-hidden="true" />}{pending ? session.tutorPending ? "Getting guidance…" : "Checking your step…" : "Check My Step"}<span className="enter-hint" aria-hidden="true"><CornerDownLeft size={15} aria-hidden="true" />Enter</span></button>
+                <button type="submit" className="button button-primary check-step-button" disabled={pending || limitReached}>{pending ? <LoaderCircle size={19} className="spinner" aria-hidden="true" /> : <Send size={19} aria-hidden="true" />}{!session.ready ? "Loading your work…" : pending ? session.tutorPending ? "Getting guidance…" : "Checking your step…" : "Check My Step"}<span className="enter-hint" aria-hidden="true"><CornerDownLeft size={15} aria-hidden="true" />Enter</span></button>
               </form>
             )}
             {!complete && acceptedSteps.length > 0 && <div className="reset-area">{resetOpen ? <><span>Clear this solution?</span><button type="button" className="sample-button" disabled={pending} onClick={restart}>Start again</button><button type="button" className="sample-button" onClick={() => setResetOpen(false)}>Keep working</button></> : <button type="button" className="sample-button" disabled={pending} onClick={() => setResetOpen(true)}><RotateCcw size={14} aria-hidden="true" />Start again</button>}</div>}
           </Card>
+          {!practice && learning.data.related && <Card className={`related-practice${complete ? " related-practice-complete" : ""}`} aria-labelledby="related-title">
+            <span className="status-tag status-tag-blue">Concept check</span><h2 id="related-title">{complete ? "Keep the idea going." : "Related practice is ready."}</h2>
+            <p>Try the distributive property in a different equation. Your current solution stays saved.</p>
+            <Link href="/practice" className={`button ${complete ? "button-primary" : "button-secondary"}`} aria-disabled={pending} onClick={event => { if (pending) event.preventDefault(); else learning.startPractice(true); }}>Try related practice<ArrowRight size={17} aria-hidden="true" /></Link>
+          </Card>}
           <section className="key-idea" aria-labelledby="key-idea-title"><span className="icon-tile"><BookOpen size={25} aria-hidden="true" /></span><div><p>Key idea</p><h2 id="key-idea-title">Distributive property</h2><DistributiveRule /></div></section>
         </div>
 
@@ -108,7 +115,7 @@ export function StudyWorkspace() {
             {acceptedSteps.length === 0 ? <p className="history-empty">Your checked steps will appear here.</p> : <ol>{acceptedSteps.map((equation, index) => <li key={`${index}-${equation}`}><span className="accepted-mark"><Check size={14} aria-label="Accepted" /></span><div className="math-scroll"><MathText equation={equation} /></div></li>)}</ol>}
           </section>
           {!complete && <div className="next-goal"><span>Next goal</span><h3>{stageLabels[stage]}</h3><p>{stagePrompts[stage]}</p></div>}
-          <p className="session-note">Your work and chat stay here while you navigate. Refreshing starts a new session. Progress tracking is not connected yet.</p>
+          <p className="session-note">{learning.warning ? "Your work is available in this tab. Check the storage notice before refreshing." : "Your work, chat and learning history are saved in this browser. They stay here after a refresh."} No account or cross-device sync is connected.</p>
         </Card>
       </div>
     </>
