@@ -2,7 +2,7 @@
 
 ## Current boundary
 
-Phase 1 is implemented and verified: lint, strict typecheck, production build, 54 unit/API/component tests, 6 real-browser E2E scenarios and 30 responsive page-width combinations pass. The origin-normalization regression discovered by E2E is fixed and covered. Stop here: Phase 2 requires the owner's explicit approval. No real or simulated AI calls, follow-up generator or persistent progress metrics have been introduced.
+Phase 2 was explicitly approved by the owner. The server-only OpenAI adapter, two-way chat and teaching state machine are implemented. Lint, strict typecheck, production build, 100 automated unit/API/component/SDK tests and 30 read-only responsive combinations pass. All 12 browser scenarios passed in the owner's Terminal. The owner approved one paid live smoke request and continuation to Phase 3 on 2026-11-09. The sandbox could not connect to localhost, so no provider call occurred; the owner-terminal smoke result remains NOT VERIFIED. Test fixtures do not establish real AI functionality.
 
 ## Initial audit — 2026-11-08
 
@@ -301,6 +301,94 @@ tsconfig.json
 vitest.config.mts
 ```
 
+## Phase 2 — real API adapter, Socratic state and chat
+
+### Plan and implementation
+
+1. `src/lib/tutor/` defines bounded contracts, server-replayed teaching state, verified mathematical examples, plain-prose guards, prompts, best-effort process budgets and the OpenAI adapter.
+2. `/api/tutor` supplies a configuration-only GET and a schema-validated POST. It independently replays all math from the starter; it never trusts client correctness or hint-depth claims. `src/lib/server/http.ts` shares the origin/body checks with `/api/check-step`.
+3. Study now has a separate question draft, message log, loading/error/retry states and progressive Hint/Show worked step controls. Model status becomes Connected only after a real successful, accepted response; disabled/unavailable/guarded outputs are honest states.
+4. Unit/API/component/SDK tests use injected mock providers only. Browser tutor scenarios intercept the provider boundary; the owned Playwright server forces `TUTOR_ENABLED=false` and refuses to reuse an unknown server.
+5. `scripts/smoke-tutor.mjs` is a separate one-request live check with an explicit `--allow-paid` requirement. Setup, limits and current status are in `docs/AI_INTEGRATION.md`.
+
+### Important decisions
+
+- Installed the official `openai@7.53.0` and `server-only@0.0.1` locally; owner reported zero npm audit findings. No global packages or browser downloads were added.
+- `OPENAI_MODEL` defaults to the supplied `gpt-6-luna`. No silent fallback or account-availability claim. The SDK uses Responses `parse`, `zodTextFormat`, low reasoning effort, 1,200 output tokens, `store:false`, a 15-second deadline and zero automatic retries.
+- Live calls are disabled unless `TUTOR_ENABLED=true` and a nonempty API key is present. The key is read only by server runtime code, never inspected from a real secret file by the agent or returned to the client.
+- The model receives separately labeled server facts and untrusted student context. Its schema cannot return a verdict or arbitrary formula. Server-owned examples are independently verified; prose is heuristically screened for grading contradictions, early answers/numeric claims, markup and inconsistent hint metadata. This is not a proof of every possible English claim; actual model teaching quality still needs live evaluation.
+- State/hint depth are replayed from raw actions. Math is always recomputed. Client history is not a cryptographically attested record; persistence and durable learning events remain Phase 3.
+- Duplicate requests with the same ID/context share an in-process promise/result cache for two minutes; changed content under a cached ID is rejected. Provider failures can be explicitly retried; a retry does not append accepted math or student messages twice. Failed hints do not advance delivered-hint history on the client.
+- Best-effort limits: two concurrent provider calls and thirty per process per minute. These are not global/durable serverless controls or a billing hard cap; add durable limiting/access control before public deployment.
+- Chat and math drafts remain separate. Free questions do not create algebra mistakes. Provider errors preserve text and deterministic feedback remains available. No follow-up generator, durable events or invented progress data were added.
+
+### Verification so far
+
+- `npm run test`: 100/100 pass across eight suites. Includes SDK-mocked request options, no-call disabled configuration, gradual hints, checked examples, contradictory model output, schema/prompt injection boundaries, timeouts/quota, duplicate/concurrent retries, cancellation, process limits and UI preservation/retry.
+- `npm run lint`: PASS with zero warnings.
+- `npm run typecheck`: PASS after the complete source changes.
+- `npm run build`: PASS, with both Node API routes and all five app pages. One intermediate build was interrupted after a delay; the subsequent standalone typecheck and clean rerun passed.
+- Read-only responsive QA: 30/30 at 1440/1024/768/390/360/375, 0 blocking findings. Additional full-page mobile composer capture is clean. Reports: `/tmp/math-tutor-phase2-web-qa/` and `/tmp/math-tutor-phase2-mobile-full/`. No submissions or AI calls were made by QA. Existing canonical warnings remain accepted for local noindex pages.
+- Original preservation: all 13 original SHA-256 hashes still match; none of those files is tracked. Client static chunks contain no OpenAI SDK endpoint/API-key identifiers.
+- Browser suite: owner ran `npm run test:e2e` in unrestricted Terminal: 12/12 PASS in 17.6 seconds, covering desktop/tablet/mobile baseline and mock-provider conversation/hints/failure/retry. `test-results/.last-run.json` confirms `passed` and no failed IDs. No paid API call was made by this suite.
+- Live API: NOT VERIFIED, no paid calls made. The production adapter explicitly disables SDK logging to prevent verbose environment settings from printing request content. The owner explicitly approved one request on 2026-11-09. The sandbox attempt failed before connecting to localhost; no OpenAI request occurred. The owner has the exact Terminal command, and its result is pending. Do not repeat paid requests automatically.
+
+### Phase 2 checklist
+
+- [x] Read requirements/status and current official OpenAI documentation; preserve all original handoff files.
+- [x] Server-only real SDK integration with Structured Outputs, configurable model, bounded requests, timeout and clear errors.
+- [x] Independent math replay and hint policy; output guard cannot change deterministic verdicts.
+- [x] Functional separate chat, loading/errors, explicit retries and progressive hints.
+- [x] 100 mock-only automated tests; lint/typecheck/build green.
+- [x] Responsive QA at all six widths, read-only with no paid calls.
+- [x] Expanded real-browser suite with test-only mock providers: 12/12 pass.
+- [x] Optional live smoke test: owner approved one request; sandbox localhost access blocked. Recorded NOT VERIFIED with exact owner-terminal instructions.
+- [x] Final docs/change-set review and process cleanup checked; this change set is ready for its Phase 2 commit.
+- [x] Stop at the Phase 2 boundary; the owner subsequently authorized Phase 3.
+
+### Exact Phase 2 change set
+
+36 source/configuration/documentation files added or updated. No original handoff files are included.
+
+```text
+.env.example
+README.md
+docs/AI_INTEGRATION.md
+docs/IMPLEMENTATION_PROGRESS.md
+package-lock.json
+package.json
+playwright.config.ts
+scripts/smoke-tutor.mjs
+src/app/api/check-step/route.ts
+src/app/api/tutor/route.ts
+src/app/globals.css
+src/app/layout.tsx
+src/app/page.tsx
+src/app/study/page.tsx
+src/components/study/study-session.tsx
+src/components/study/study-workspace.tsx
+src/components/study/tutor-chat.tsx
+src/lib/server/http.ts
+src/lib/tutor/contracts.ts
+src/lib/tutor/examples.ts
+src/lib/tutor/limits.ts
+src/lib/tutor/openai-provider.ts
+src/lib/tutor/policy.ts
+src/lib/tutor/prompt.ts
+src/lib/tutor/service.ts
+tests/components/study-workspace.test.tsx
+tests/components/tutor-chat.test.tsx
+tests/e2e/study.spec.ts
+tests/e2e/tutor.spec.ts
+tests/fixtures/server-only.ts
+tests/fixtures/tutor.ts
+tests/tutor/openai-provider.test.ts
+tests/tutor/policy.test.ts
+tests/tutor/service.test.ts
+tests/tutor/smoke-opt-in.test.ts
+vitest.config.mts
+```
+
 ## Next session
 
-After explicit Phase 2 approval, add real server-only AI guidance and the Socratic teaching state machine. Do not add progress persistence or generated practice ahead of Phase 3. Keep the independent math verdict authoritative.
+Phase 3 is authorized: implement verified related problems and persisted learning events. The separately approved live smoke check remains NOT VERIFIED until the owner supplies the unrestricted Terminal result. The math engine remains authoritative.

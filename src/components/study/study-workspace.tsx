@@ -8,6 +8,7 @@ import { MAX_EQUATION_LENGTH } from "@/lib/math/parser";
 import { STARTER_EQUATION } from "@/lib/math/verifier";
 import { DistributiveRule, MathText } from "./math-text";
 import { useStudySession } from "./study-session";
+import { TutorChat } from "./tutor-chat";
 
 const stageLabels = { expand: "Expand the brackets", combine: "Bring the variable terms together", isolate: "Isolate the variable", check: "Check the value" };
 const stagePrompts = { expand: "Apply the outside factor to every term inside the brackets.", combine: "Choose an operation that simplifies the variable terms on both sides.", isolate: "Use the same operation on both sides to leave the variable on its own.", check: "Substitute your value into the original equation to see that both sides agree." };
@@ -20,7 +21,7 @@ export function StudyWorkspace() {
   const input = useRef<HTMLInputElement>(null);
   const completion = useRef<HTMLDivElement>(null);
   const complete = feedback?.isComplete ?? false;
-  const limitReached = acceptedSteps.length >= MAX_ACCEPTED_STEPS;
+  const limitReached = acceptedSteps.length >= MAX_ACCEPTED_STEPS || session.full;
   const current = acceptedSteps.at(-1) ?? STARTER_EQUATION;
   const stage = feedback?.canAdvance ? feedback.stage : acceptedSteps.length ? (feedback?.stage ?? "combine") : "expand";
   const invalid = !!feedback && feedback.submittedEquation === draft && (feedback.verdict === "incorrect" || feedback.parseStatus !== "valid");
@@ -85,8 +86,8 @@ export function StudyWorkspace() {
                 {invalid && <p id="equation-error" className="inline-math-error"><CircleAlert size={16} aria-hidden="true" />{feedback?.title}. Your last accepted step is unchanged.</p>}
                 <div className="math-keypad" aria-label="Equation symbols">{controls.map(({ value, label, icon: Icon }) => <button key={label} type="button" aria-label={label} disabled={pending || limitReached} onClick={() => insert(value)}>{Icon ? <Icon size={18} aria-hidden="true" /> : value}</button>)}</div>
                 {networkError && <p className="network-error" role="alert">{networkError}</p>}
-                {limitReached && <p className="network-error" role="status">This session has reached its 48-step limit. Start again to continue.</p>}
-                <button type="submit" className="button button-primary check-step-button" disabled={pending || limitReached}>{pending ? <LoaderCircle size={19} className="spinner" aria-hidden="true" /> : <Send size={19} aria-hidden="true" />}{pending ? "Checking your step…" : "Check My Step"}<span className="enter-hint" aria-hidden="true"><CornerDownLeft size={15} aria-hidden="true" />Enter</span></button>
+                {limitReached && <p className="network-error" role="status">This session has reached its interaction limit. Start again to continue.</p>}
+                <button type="submit" className="button button-primary check-step-button" disabled={pending || limitReached}>{pending ? <LoaderCircle size={19} className="spinner" aria-hidden="true" /> : <Send size={19} aria-hidden="true" />}{pending ? session.tutorPending ? "Getting guidance…" : "Checking your step…" : "Check My Step"}<span className="enter-hint" aria-hidden="true"><CornerDownLeft size={15} aria-hidden="true" />Enter</span></button>
               </form>
             )}
             {!complete && acceptedSteps.length > 0 && <div className="reset-area">{resetOpen ? <><span>Clear this solution?</span><button type="button" className="sample-button" disabled={pending} onClick={restart}>Start again</button><button type="button" className="sample-button" onClick={() => setResetOpen(false)}>Keep working</button></> : <button type="button" className="sample-button" disabled={pending} onClick={() => setResetOpen(true)}><RotateCcw size={14} aria-hidden="true" />Start again</button>}</div>}
@@ -95,8 +96,8 @@ export function StudyWorkspace() {
         </div>
 
         <Card className="lesson-tutor" aria-labelledby="tutor-title">
-          <div className="tutor-heading"><span className="tutor-avatar"><Bot size={31} strokeWidth={1.6} aria-hidden="true" /></span><div><h2 id="tutor-title">AI Tutor</h2><span className="tutor-status">AI integration pending</span></div></div>
-          <div className="integration-note"><p>AI guidance isn’t connected yet.</p><span>Your steps are checked by the algebra engine. Feedback below comes from that checker.</span></div>
+          <div className="tutor-heading"><span className="tutor-avatar"><Bot size={31} strokeWidth={1.6} aria-hidden="true" /></span><div><h2 id="tutor-title">AI Tutor</h2><span className="tutor-status" data-connected={session.tutorEnabled && session.connection === "online"}>{session.tutorPending ? "Thinking…" : !session.availability ? "Checking availability…" : !session.tutorEnabled || session.connection === "error" ? "AI unavailable" : session.connection === "online" ? "Connected" : "Not connected yet"}</span></div></div>
+          <TutorChat />
           <div className="checker-feedback" data-verdict={feedback?.verdict ?? "ready"} aria-live="polite" aria-atomic="true">
             <div className="feedback-label">Math checker</div>
             {feedback ? <><h3>{feedback.canAdvance ? <CheckCircle2 size={19} aria-hidden="true" /> : <CircleAlert size={19} aria-hidden="true" />}{feedback.isComplete ? "Solution verified" : feedback.title}</h3><p>{feedback.message}</p></> : <><h3>Start with the brackets.</h3><p>Enter an equation on the left to check whether your transformation keeps the same solution.</p></>}
@@ -107,7 +108,7 @@ export function StudyWorkspace() {
             {acceptedSteps.length === 0 ? <p className="history-empty">Your checked steps will appear here.</p> : <ol>{acceptedSteps.map((equation, index) => <li key={`${index}-${equation}`}><span className="accepted-mark"><Check size={14} aria-label="Accepted" /></span><div className="math-scroll"><MathText equation={equation} /></div></li>)}</ol>}
           </section>
           {!complete && <div className="next-goal"><span>Next goal</span><h3>{stageLabels[stage]}</h3><p>{stagePrompts[stage]}</p></div>}
-          <p className="session-note">Your work stays here while you navigate. Refreshing starts a new session. Progress tracking and AI chat are not connected yet.</p>
+          <p className="session-note">Your work and chat stay here while you navigate. Refreshing starts a new session. Progress tracking is not connected yet.</p>
         </Card>
       </div>
     </>

@@ -8,7 +8,10 @@ import { StudyWorkspace } from "@/components/study/study-workspace";
 import { StudySessionProvider } from "@/components/study/study-session";
 
 function mount() { return render(<StudySessionProvider><StudyWorkspace /></StudySessionProvider>); }
-const serverTransport = async (_url: unknown, init?: RequestInit) => POST(new Request("http://localhost/api/check-step", init));
+const serverTransport = async (url: unknown, init?: RequestInit) => String(url) === "/api/tutor"
+  ? Response.json({ enabled: false, configured: false })
+  : POST(new Request("http://localhost/api/check-step", init));
+const postCalls = () => vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "POST");
 
 beforeEach(() => {
   vi.stubGlobal("fetch", vi.fn(serverTransport));
@@ -22,7 +25,7 @@ describe("Study interaction with real verifier and an in-process API transport",
     const input = screen.getByLabelText("Your next step");
     await user.click(screen.getByRole("button", { name: /Try sample mistake/ }));
     expect(input).toHaveValue("3x + 4 = 2x + 19");
-    expect(fetch).not.toHaveBeenCalled();
+    expect(postCalls()).toHaveLength(0);
     await user.keyboard("{Enter}");
     await screen.findByRole("heading", { name: "Look at the distribution" });
     expect(input).toHaveAttribute("aria-invalid", "true");
@@ -33,7 +36,7 @@ describe("Study interaction with real verifier and an in-process API transport",
     }
     expect(await screen.findByRole("heading", { name: "Nice work. Equation solved!", level: 3 })).toBeVisible();
     expect(screen.getByText("3 accepted steps")).toBeVisible();
-    expect(screen.getByText("AI integration pending")).toBeVisible();
+    expect(screen.getByText("AI unavailable", { exact: true })).toBeVisible();
     await user.click(screen.getByRole("button", { name: /Try again/ }));
     expect(screen.getByLabelText("Your next step")).toHaveValue("");
     await waitFor(() => expect(screen.getByLabelText("Your next step")).toHaveFocus());
@@ -52,7 +55,11 @@ describe("Study interaction with real verifier and an in-process API transport",
     expect(screen.getByText("Rule reminder · not an AI-generated hint")).toBeVisible();
   });
   it("preserves the draft on a network error and allows retry", async () => {
-    vi.mocked(fetch).mockRejectedValueOnce(new Error("offline"));
+    let failed = false;
+    vi.mocked(fetch).mockImplementation(async (url, init) => {
+      if (init?.method === "POST" && !failed) { failed = true; throw new Error("offline"); }
+      return serverTransport(url, init);
+    });
     const user = userEvent.setup(); mount();
     const input = screen.getByLabelText("Your next step");
     await user.type(input, "x=7{Enter}");
@@ -63,12 +70,13 @@ describe("Study interaction with real verifier and an in-process API transport",
   });
   it("blocks duplicate requests while a response is pending", async () => {
     let resolve!: (response: Response) => void;
-    vi.mocked(fetch).mockImplementationOnce(() => new Promise<Response>(done => { resolve = done; }));
+    vi.mocked(fetch).mockImplementation((url, init) => init?.method === "POST"
+      ? new Promise<Response>(done => { resolve = done; }) : serverTransport(url, init));
     const user = userEvent.setup(); mount();
     await user.type(screen.getByLabelText("Your next step"), "x=7");
     const button = screen.getByRole("button", { name: "Check My Step" });
     await user.dblClick(button);
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(postCalls()).toHaveLength(1);
     expect(button).toBeDisabled();
     resolve(await POST(new Request("http://localhost/api/check-step", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acceptedSteps: [], equation: "x=7" }) })));
     await screen.findByRole("heading", { name: "Nice work. Equation solved!", level: 3 });

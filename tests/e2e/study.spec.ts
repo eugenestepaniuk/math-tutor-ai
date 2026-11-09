@@ -24,7 +24,7 @@ test("mistake, correction, alternative steps, navigation and completion", async 
   }
   await expect(page.getByRole("heading", { name: "Nice work. Equation solved!", exact: true }).first()).toBeVisible();
   await expect(page.getByText("3 accepted steps")).toBeVisible();
-  await expect(page.getByText("AI integration pending")).toBeVisible();
+  await expect(page.getByText("AI unavailable", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: /Try again/ }).click();
   await expect(input).toBeVisible();
   await expect(input).toBeFocused();

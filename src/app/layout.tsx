@@ -11,7 +11,7 @@ import { StudySessionProvider } from "@/components/study/study-session";
 
 export const metadata: Metadata = {
   title: { default: "MathTutor AI — Understand every step", template: "%s | MathTutor AI" },
-  description: "Step-by-step algebra practice with independent mathematical checking. AI tutoring is not connected yet.",
+  description: "Step-by-step algebra practice with independent mathematical checking and optional AI guidance.",
   robots: { index: false, follow: false },
 };
 
