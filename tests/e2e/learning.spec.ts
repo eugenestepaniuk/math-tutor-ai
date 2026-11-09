@@ -3,7 +3,7 @@ import { mockTutor } from "../fixtures/browser-tutor";
 import { parseEquation } from "../../src/lib/math/parser";
 import { reduceExpression, solveEquation } from "../../src/lib/math/linear";
 import { formatRational } from "../../src/lib/math/rational";
-import { populatedLearning } from "../fixtures/learning";
+import { limitedLearning, populatedLearning } from "../fixtures/learning";
 import { STORAGE_KEY } from "../../src/lib/learning/storage";
 
 async function metric(page: Page, label: string, value: string) {
@@ -101,5 +101,29 @@ test("populated learning views stay responsive without submitting or calling AI"
       await page.screenshot({ path: info.outputPath(`populated-${path}-${width}.png`), fullPage: true });
     }
   }
+  expect(posts).toEqual([]);
+});
+
+test("a capped zero-accepted-step session can restart without erasing progress", async ({ page }, info) => {
+  const posts: string[] = [];
+  page.on("request", request => { if (request.method() === "POST") posts.push(request.url()); });
+  await page.addInitScript(({ key, data }) => {
+    if (location.origin === "http://127.0.0.1:3000" && !localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify(data));
+  }, { key: STORAGE_KEY, data: limitedLearning() });
+  await page.goto("/study");
+  const input = page.getByLabel("Your next step");
+  await expect(page.getByRole("heading", { name: "Look at the distribution", exact: true })).toBeVisible();
+  await expect(input).toBeDisabled();
+  await page.getByRole("button", { name: "Start again", exact: true }).click();
+  await expect(page.getByText("Clear this solution and chat?", { exact: true })).toBeVisible();
+  await page.screenshot({ path: info.outputPath("session-limit-confirm.png"), fullPage: true });
+  await page.getByRole("button", { name: "Keep working", exact: true }).click();
+  await expect(input).toBeDisabled();
+  await page.getByRole("button", { name: "Start again", exact: true }).click();
+  await page.getByRole("button", { name: "Start again", exact: true }).click();
+  await expect(input).toBeEnabled();
+  await input.fill("x+12="); await page.reload(); await expect(input).toHaveValue("x+12=");
+  await page.goto("/progress");
+  await metric(page, "Attempts", "64"); await metric(page, "Completed exercises", "0");
   expect(posts).toEqual([]);
 });

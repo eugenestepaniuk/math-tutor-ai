@@ -1,84 +1,85 @@
 # MathTutor AI
 
-**Phase 4: algebra practice with a real-data dashboard and curriculum.** Enter actual steps for a linear equation and receive specific, mathematically checked feedback. The English-language interface uses the approved problem-left/tutor-right composition, with a stacked layout on phones.
+An English-language algebra tutor prototype built with Next.js, React and TypeScript. Students submit actual equation transformations; a restricted deterministic engine checks the mathematics, while a separate server-side model adapter supplies Socratic guidance. Related practice and learning events persist in the same browser.
 
-**A successful live AI response is not yet verified.** The OpenAI integration, two-way chat and progressive hints are implemented and tested with mock providers. Live calls require an explicit server opt-in and API key; configuration alone is not proof of model access. Study and Practice share the checker/tutor, and actual learning events persist locally. Static rule reminders and checker feedback remain clearly labeled.
+**Live AI status: NOT_VERIFIED.** Two explicitly approved local requests returned a provider-limit error (OpenAI 429), with no tutor prose. Automated tutor tests use clearly separated mock providers. Deterministic checking, generated practice, saved progress and every page work without a key. No hosted demo URL or successful deployed request is claimed.
 
 ## Run locally
 
-Use Node.js 24 (`.nvmrc`) and npm; the minimum is Node 22.12.0 for the test toolchain. Development was verified with Node 24.7.0 and npm 11.5.1.
+Use **Node 24.x** (`.nvmrc`, package and lockfile engines agree) and npm. Verified locally with Node 24.7.0 and npm 11.5.1. The browser tests use installed Google Chrome; no browser download is required.
 
 ```bash
 npm ci
 npm run dev
 ```
 
-Open http://localhost:3000/study. A production preview uses:
+Open http://localhost:3000/study. `npm install` is available for development; `npm ci` preserves the locked install. A production preview uses `npm run build` followed by `npm run start`. Fonts are self-hosted and the build needs no AI key or provider request.
 
-```bash
-npm run build
-npm run start
+For real tutoring, create `.env.local` from `.env.example` only if it does not already exist, then configure it privately in your editor:
+
+```dotenv
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-6-luna
+TUTOR_ENABLED=false
 ```
 
-No API key is needed for deterministic math checking or automated tests. For live tutoring, configure the ignored `.env.local` yourself with `OPENAI_API_KEY`, `OPENAI_MODEL=gpt-6-luna` and `TUTOR_ENABLED=true`. Never expose credentials through `NEXT_PUBLIC_*` or commit the file. Live requests use API credits. Fonts are self-hosted; building does not fetch Google Fonts. See [AI configuration and the opt-in live smoke test](docs/AI_INTEGRATION.md).
+Enter your own key and explicitly set `TUTOR_ENABLED=true` only for authorized live use, then restart the server. Never expose a key through `NEXT_PUBLIC_*`, browser code, chat or Git. Model access and API credits/limits must actually work; a configured key alone is not proof. No silent model fallback exists. See [AI configuration and the opt-in smoke test](docs/AI_INTEGRATION.md).
 
 ## Reviewer flow
 
-1. Open Study and see `3(x + 4) = 2x + 19`.
-2. Click **Try sample mistake**. It only fills `3x + 4 = 2x + 19`; it does not submit or change the accepted history.
-3. Press Enter or **Check My Step**. The independent checker identifies incomplete distribution and keeps the last accepted equation intact, without showing the completed expansion or final answer.
-4. Submit `3x + 12 = 2x + 19`, then `x + 12 = 19`, then `x = 7`.
-5. Related practice appears as soon as the mistake is corrected, then becomes prominent on completion. Open **Try related practice**, submit valid steps for its generated equation, and solve it.
-6. Open **Progress** and refresh: actual attempts, unique completed exercises, corrections and follow-up outcomes stay saved. **Try again** clears only the current solution; saved learning events remain. **Clear saved history** requires confirmation on Progress.
+1. Open Study: `3(x + 4) = 2x + 19`.
+2. **Try sample mistake** fills `3x + 4 = 2x + 19` without submitting. Press Enter or **Check My Step**: the checker identifies omitted distribution and keeps the previous valid equation.
+3. With functioning live AI, the tutor should ask a targeted question without revealing the solution. **Hint** progresses to a rule prompt, an unfinished checked operation, then an explicitly requested worked step. When AI is unavailable, that state is shown honestly; the static **Review the rule** reminder is labeled separately.
+4. Submit `3x + 12 = 2x + 19`, then `x + 12 = 19`, then `x = 7`. Equivalent paths such as `3x - 2x = 19 - 12` are accepted. A direct verified final value is accepted with an invitation to show the expansion.
+5. Related practice appears when the misconception is corrected and is prominent on completion. Open it, expand and solve its newly generated equation. For illustration, `5(y+2)=3y+18` has `y=4`; live generation varies rather than always returning that fixture.
+6. Open Progress, refresh and navigate Home/Curriculum. Actual attempts, unique completed equations, corrections, hints and follow-up outcomes remain saved. **Try again** resets the current solution/chat while keeping event history. Clearing all saved history requires separate confirmation.
 
-Equivalent paths work: after expansion, `3x - 2x = 19 - 12` is accepted. A direct jump to `x=7` is mathematically accepted, with an invitation to show the expansion. Syntax errors and unchanged equations are not classified as misconceptions.
+The equation keypad edits at the caret. Chat has an independent draft; asking a question is not a mathematical attempt. Loading blocks duplicates, failures preserve drafts, and explicit retries deduplicate successful actions. A full interaction-limit session can be restarted even with no accepted steps, without erasing recorded learning events.
 
-The keypad edits at the caret and can delete a selection. **Review the rule** opens a labeled static reminder. When live AI is enabled, submitting a checked step also requests contextual guidance. **Hint** gradually moves from a question to an unfinished checked operation; **Show worked step** is available at the deeper hint stage. **Ask your tutor** has its own draft and does not count a chat question as an algebra mistake. Provider failures preserve drafts and offer an explicit retry without duplicating accepted steps or student messages.
+## Actual interface captures
 
-## Supported mathematics and limits
+Fresh browser state, no seeded activity or model conversation. The pictured tutor says **Not connected yet**; these are UI captures, not evidence of live AI. Desktop captures use a 1440px viewport and are stored at 900px by the QA tool.
 
-The restricted parser supports one variable (`x` or `y`), integer literals, unary signs, addition/subtraction, implicit or explicit multiplication, grouping with `()` or `[]`, and division by nonzero scalar expressions. Intermediate fractions use exact, reduced BigInt rational arithmetic. Study supplies the trusted starter in `x`; Practice generates independently verified equations in `x` or `y`, preferring positive beginner variants while supporting negative examples.
+![Home with genuine zero activity](docs/screenshots/home-1440-full.jpg)
 
-Solution sets are compared algebraically, including unique, empty and universal cases. Only evidence-backed omitted distribution is specifically classified; other incorrect transformations receive a neutral message rather than an invented diagnosis.
+![Study workspace in a fresh browser](docs/screenshots/study-1440-full.jpg)
 
-Decimals, powers, functions, multiple variables, variable denominators and arbitrary JavaScript/TeX are unsupported. Multiplication and division follow ordinary left-to-right precedence; use brackets to clarify fractions. Inputs are bounded to 256 characters, 128 tokens, 16 nested groups/signs and 9-digit integer literals. Arithmetic magnitudes are bounded; overly complex/large expressions are safely rejected. The API caps actual streamed bodies at 16 KiB and histories at 48 accepted steps.
+<details>
+<summary>Mobile Study capture (390px viewport)</summary>
 
-## Architecture
+<img src="docs/screenshots/study-390-full.jpg" alt="Fresh Study on a phone, problem before tutor" width="280" />
 
-```text
-src/app/api/check-step/route.ts   # Bounded request, Zod schema, server-side replay
-src/lib/math/
-  rational.ts                   # Exact bounded rational arithmetic
-  parser.ts                     # Restricted AST; no eval or arbitrary execution
-  linear.ts                     # Linear coefficient reduction and solution sets
-  verifier.ts                   # Verdict, completion, conservative mistake evidence
-  contracts.ts                  # Request and public response schemas
-  format.ts                     # Controlled AST-to-TeX formatting
-src/components/study/
-  math-text.tsx                 # Thin React wrapper over the current KaTeX API
-  study-session.tsx             # Separate Study/Practice sessions and request lifecycle
-  study-workspace.tsx           # Form, keypad, rule reminder, feedback and history
-  tutor-chat.tsx                # Message log, composer, progressive hints and retries
-src/lib/tutor/                  # Contracts, replayed teaching state, checked examples,
-                                # prose guards, prompts, process limits and SDK adapter
-src/app/api/tutor/route.ts       # Configuration GET and server-verified tutoring POST
-src/lib/server/http.ts          # Shared bounded-body and same-origin checks
-src/lib/practice/problems.ts    # Reproducible bounded generator and verification
-src/lib/learning/               # Deduplicated events, derived statistics and storage
-src/components/learning/        # Persistence provider and Practice/Progress views
+</details>
+
+## Architecture and mathematical boundaries
+
+```mermaid
+flowchart LR
+  UI[React workspace] --> Check[Check-step API]
+  Check --> Math[Restricted exact algebra engine]
+  UI --> Tutor[Tutor API]
+  Tutor --> Math
+  Tutor --> Model[Server-only OpenAI adapter]
+  Model --> Prose[Schema-checked guidance]
+  Prose --> UI
+  UI --> Local[Versioned local learning events]
 ```
 
-The fast math checker receives a bounded problem reference, candidate equation and previously accepted equations. The server reconstructs that problem and rechecks the entire chain; client correctness claims are rejected. Public responses omit the internal canonical answer. Tutoring additionally replays bounded raw actions, derives hint depth and passes independently verified facts to OpenAI Responses Structured Outputs. The model supplies prose, while formulas and correctness remain server-owned. The origin check uses the browser-facing Host because Next may normalize its internal request URL to localhost.
+Both APIs reconstruct a bounded starter/generated problem and replay the student's accepted equations or raw actions. Client correctness claims are rejected. Math grading and displayed worked formulas are independent of the model; public responses omit the internal canonical answer. The model has no tools, database or privileged actions. Its additional English-prose guard is conservative and heuristic, not a proof of every possible teaching claim.
 
-KaTeX receives only parser-generated TeX or the fixed generic rule, with `trust: false` and bounded expansion. Student text is never treated as HTML/TeX. A small owned React wrapper avoids coupling the UI to an older KaTeX wrapper dependency.
+The parser supports one variable (`x` or `y`), integers, unary signs, addition/subtraction, grouping, implicit/explicit multiplication and scalar division. Exact bounded BigInt rationals support fractional intermediate values. Solution sets are compared algebraically. Generalized omitted distribution is classified when supported by structural evidence; other rejected steps get neutral feedback. Syntax/no-op input does not become a misconception.
 
-## Session and phase boundaries
+Functions, decimals, powers, multiple variables, variable denominators and arbitrary JS/TeX are unsupported. Bounds include 256 characters, 128 tokens, 16 nested groups/signs, 9-digit literals and bounded arithmetic magnitude. API bodies are streamed with 16 KiB/64 KiB limits. KaTeX receives controlled expressions with `trust:false`; model/student text is escaped.
 
-Separate Study and Practice solutions, drafts, chat and actual events survive navigation and refresh through versioned browser storage. Corrupt/unknown data is preserved with a visible warning; storage failures do not masquerade as successful saves. No account or cross-device sync exists. Progress derives its statistics from deduplicated events and explains each denominator. See [learning event and storage semantics](docs/LEARNING_PROGRESS.md).
+Core modules: `src/lib/math/`, `src/lib/practice/`, `src/lib/tutor/`, `src/lib/learning/`, shared Study/Practice UI and two Node API routes. The SDK uses Responses Structured Outputs,15s timeout, 1200 output tokens, no automatic retries/logging and `store:false`. This storage flag does not claim all provider retention is disabled.
 
-Home now shows actual saved activity, the current equation and relevant practice; Curriculum launches the implemented linear-equations lesson and labels future topics Coming later. Phase 4 is implemented and verified, including all 27 browser scenarios and populated Home/Curriculum layouts at six widths. Phase 5 assessment/release checks have not started. After configuration was enabled, one explicitly approved live attempt returned `provider_limit` (OpenAI 429), with no tutor prose. The deterministic distribution verdict and honest unavailable state were preserved. Successful live teaching remains unverified; there were no automatic retries. Native Web/iOS/Android expansion remains a plan: share pure TypeScript domain contracts with React Native/Expo and move to authenticated backend storage later. No native applications exist.
+## Progress and limitations
 
-## Checks
+Study/Practice solutions, drafts, chat and deduplicated events persist in versioned localStorage. Unknown/corrupt records are preserved with a notice; storage/quota/cross-tab failures are explicit. Counts reflect actual checked events. Practice accuracy excludes syntax/no-op input; follow-up accuracy explains its attempted-task denominator. These are practice measures, not certified mastery. See [event and storage semantics](docs/LEARNING_PROGRESS.md).
+
+This MVP has one implemented lesson, no accounts, cloud sync, database, payments or analytics. A different browser starts empty. Browser-local data is editable by its owner and is not an authenticated school record. AI limits/cache are process-local and do not provide a durable global spend cap. **Do not expose billable AI publicly without an appropriate hosted/shared access and cost control.** See the [scoped security review](docs/SECURITY_REVIEW.md).
+
+## Verification
 
 ```bash
 npm run lint
@@ -88,20 +89,16 @@ npm run build
 npm run test:e2e
 ```
 
-Vitest covers teaching-state replay, guarded model output, SDK contracts, retries/budgets, chat interaction and the math acceptance cases M01–M16, generalized distribution examples, 100 coefficient-based expansion fixtures, bounded server contracts and component interactions. M12 now checks 100 actual generated equations; further tests cover event deduplication, correction timing, follow-up outcomes, storage validation and refresh. Component tests use in-process transports to the real verifier/teaching service. Tutor scenarios inject test-only mock providers and do not establish live AI functionality.
+Final local results: **125 tests, 30 browser scenarios**, lint, strict typecheck and production build pass. Browser cases passed in the owner's Terminal in 35.2s across desktop/tablet/mobile, including correction, progressive mock-provider guidance, transfer, refresh, failed requests, keyboard navigation and capped-session recovery. The test server forces live AI off; fixtures are only in `tests/`.
 
-Playwright uses the already-installed Google Chrome, starts/stops a production server when needed, and runs the correction/completion/navigation and failure/retry flows at desktop, tablet and mobile sizes. Live calls are forced off for the owned test server; new chat scenarios intercept the provider boundary with fixtures. Run the build first; no browser download is required. A restricted sandbox that blocks localhost connections cannot run this command: run it in an unrestricted Terminal instead.
+Read-only responsive QA passes all five routes at 1440/1024/768/390/360/375. Git history was scanned with redacted Gitleaks with no leak found. The official npm advisory endpoint returned an empty advisory set for the locked versions; the npm CLI itself was DNS-blocked. A restricted sandbox cannot run Playwright's localhost server; use an unrestricted Terminal.
 
-Phase 4 verification: 124 unit/API/component/SDK tests, lint, strict typecheck and production build pass. Final fresh-state responsive QA passed all five routes at 1440/1024/768/390/360/375 (30 combinations), plus reduced-motion Home/Curriculum at 375px. The owner ran the expanded browser suite: 27/27 PASS in 35.5 seconds. It verifies navigation, keyboard continuation, current drafts, saved metrics and existing practice. The suite generated 30 populated screenshots (five pages at six widths). Home/Curriculum passed visual review at all six widths; supporting views were spot-checked without regressions. Evidence, exact changed files and known limitations are in [implementation progress](docs/IMPLEMENTATION_PROGRESS.md). See the [reference comparison and intentional visual differences](docs/DESIGN_REVIEW.md).
+The [ten-point acceptance report](docs/ACCEPTANCE_REPORT.md) records **eight PASS and two NOT_VERIFIED**, with exact evidence. The unresolved items are genuine live guidance and actual adaptive model behavior; mocks do not satisfy them. Known tooling/CSP/hosting limits are explicit. [Design comparison](docs/DESIGN_REVIEW.md) and [implementation history/exact files](docs/IMPLEMENTATION_PROGRESS.md) contain supporting details.
 
-## Reviewer access
+## Submission, hosting and future platforms
 
-A deployed demo should use the owner-configured API key in server-only host environment variables. Reviewers open the URL and use the tutor without creating a key or receiving credentials. Deployment and a real hosted-provider success check are still pending; no live demo URL is claimed here.
+A hosted reviewer uses the owner's server configuration and never receives or creates the OpenAI key. Public hosting has not been executed or verified. The [release guide](docs/RELEASE_GUIDE.md) contains owner-run GitHub/Vercel instructions, protection checks, a separately authorized real smoke test and rollback steps. [Infrastructure](docs/INFRASTRUCTURE.md) records what is planned versus verified. Do not submit the live-AI requirement as complete until it actually passes.
 
-The source project and automated checks run without an API key. Local deterministic checking, generated practice and browser progress remain functional when AI is unavailable. Running live tutoring from a local clone requires an authorized provider configuration. The assessment's genuine-AI requirement cannot be replaced by static messages or test fixtures. See [AI verification status](docs/AI_INTEGRATION.md).
+Future Web/iOS/Android work would share pure TypeScript domain contracts and a hosted API, with React Native/Expo-specific phone UI rather than a wrapped desktop page. Authenticated backend storage would replace browser-only records for multi-device use. Production work also needs durable usage controls, provider evaluation, appropriate privacy/retention and broader curriculum support. No native app exists now.
 
-## Dependencies and source control
-
-The dependency lockfile is included. The owner reported zero vulnerabilities after both the Phase 1 install and the OpenAI SDK/server-only install. The existing scoped minimatch override resolves the earlier tooling advisory. ESLint 9 remains end-of-life because the installed React/accessibility plugins do not declare ESLint 10 compatibility; review an ecosystem-compatible upgrade before release.
-
-All original handoff specifications and reference PNGs remain unchanged and excluded from commits at the owner's request. A clone therefore contains implementation code and its new documentation, not the private handoff kit. No deployment, push, analytics or production data has been configured. One explicitly approved live model attempt returned a provider rate/quota failure; no successful live AI response is claimed.
+All original private handoff files/reference PNGs remain unchanged and excluded from commits at the owner's request; a clone contains the implementation and new documentation. Real env files and build/test output are ignored. No push, deployment, domain or billing changes were performed by the agent.

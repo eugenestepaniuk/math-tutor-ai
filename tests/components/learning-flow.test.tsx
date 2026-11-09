@@ -14,6 +14,7 @@ import { STORAGE_KEY } from "@/lib/learning/storage";
 import { resolveProblem } from "@/lib/practice/problems";
 import { solveEquation } from "@/lib/math/linear";
 import { parseEquation } from "@/lib/math/parser";
+import { limitedLearning } from "../fixtures/learning";
 
 function Pages() {
   const learning = useLearning();
@@ -29,6 +30,24 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 const mount = () => render(<StudySessionProvider><Pages /></StudySessionProvider>);
 
 describe("persistent learning flow without an AI provider", () => {
+  it("recovers a capped session with no accepted steps and preserves learning events", async () => {
+    const data = limitedLearning(); window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const user = userEvent.setup(); mount();
+    await screen.findByRole("heading", { name: "Look at the distribution" });
+    const input = screen.getByLabelText("Your next step");
+    expect(input).toBeDisabled();
+    const restart = screen.queryByRole("button", { name: /^Start again$/ });
+    expect(restart).toBeInTheDocument();
+    await user.click(restart!);
+    await user.click(screen.getByRole("button", { name: "Keep working" }));
+    expect(input).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Start again" }));
+    await user.click(screen.getByRole("button", { name: "Start again" }));
+    await waitFor(() => expect(input).toBeEnabled());
+    const saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY)!);
+    expect(saved.study.history).toEqual([]); expect(saved.events).toEqual(data.events);
+    expect(screen.getByText("0 accepted steps")).toBeVisible();
+  });
   it("surfaces practice on correction, completes a generated follow-up, restores and resets", async () => {
     const user = userEvent.setup(); let view = mount();
     const input = screen.getByLabelText("Your next step");

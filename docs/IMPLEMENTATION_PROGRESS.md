@@ -2,7 +2,7 @@
 
 ## Current boundary
 
-Phase 4 is complete and verified following owner approval on 2026-11-09. Home/Curriculum, real saved-data cards, navigable breadcrumbs and supporting-view polish are implemented. 124 tests, lint, strict typecheck, production build and all 27 browser scenarios pass. Fresh responsive QA passed 30 combinations plus two reduced-motion checks; new populated Home/Curriculum layouts passed visual review at all six widths. Live AI remains NOT VERIFIED after the prior provider-limited attempt. No Phase 4 model request, push or deployment was made. Phase 5 is not authorized.
+The authorized local Phase 5 work is complete: the capped-session reset and deployment-runtime issues are fixed; 125 tests, 30 browser scenarios, lint/typecheck/build and final responsive review pass. Security, acceptance, infrastructure and release notes plus real UI captures are included. Acceptance remains eight PASS/two NOT_VERIFIED because both approved real-provider attempts returned 429 without tutor guidance. No extra paid call, push, hosting change or deployment is authorized.
 
 ## Initial audit — 2026-11-08
 
@@ -555,6 +555,86 @@ tests/e2e/learning.spec.ts
 tests/e2e/study.spec.ts
 ```
 
+
+## Phase 5 — acceptance, security and submission preparation
+
+### Plan and scope
+
+1. Inventory actual entry points and trust boundaries; use security-review-ua in full-review scope, with existing tools and explicit coverage limits.
+2. Fix confirmed issues: expose session reset when a 64-action session has no accepted steps; align package/lockfile runtime with the verified Node 24 environment and Vercel selection rules.
+3. Add meaningful capped-session preservation/recovery regression coverage. Run lint/typecheck/tests/build, the expanded browser flow and responsive checks after the UI fix.
+4. Scan Git history/staged source with installed Gitleaks, run available ESLint security rules, and check every locked package through the official npm advisory endpoint. No scanner/dependency installation without separate authorization.
+5. Prepare a ten-point PASS/FAIL/NOT_VERIFIED acceptance report, scoped security report, professional README, real UI captures and Vercel/GitHub instructions. Use go-live for preparation only; no account, DNS, mail, publication or deployment actions.
+6. Record the genuine live-AI gap, external hosting/billing checks, exact changed files and cleanup evidence. Make a local Conventional Commit only after verification.
+
+```text
+src/components/study/study-workspace.tsx  # Recover capped zero-accepted-step sessions
+package.json / package-lock.json         # Explicit verified Node 24 runtime
+ tests/fixtures/learning.ts
+ tests/components/learning-flow.test.tsx
+ tests/e2e/learning.spec.ts                # Regression: reset preserves real history
+ README.md                               # Reviewer-ready setup and current evidence
+ docs/ACCEPTANCE_REPORT.md                # Ten-point assessment status
+ docs/SECURITY_REVIEW.md                  # Applicability, tools, findings and limits
+ docs/INFRASTRUCTURE.md                   # Planned host, ownership, variables and gates
+ docs/RELEASE_GUIDE.md                    # Owner-run GitHub/Vercel and rollback steps
+ docs/screenshots/                        # Actual app captures, no concept assets
+```
+
+### Audit inventory
+
+- Next.js/React/TypeScript browser app with two Node POST boundaries and a configuration GET; exact pure algebra parser/verifier, optional server-only OpenAI SDK, anonymous local browser history.
+- No accounts/roles, database, payments, uploads, webhooks, MCP service, third-party analytics or mail. Those controls are N/A rather than invented findings.
+- Confirmed preserved controls: strict Zod boundaries, streamed body limits, server replay, no arbitrary evaluation, controlled KaTeX, model/schema separation, fixed official provider URL, no SDK logging/retries, bounded tokens/time/concurrency and no-store JSON errors.
+- External API credits/quotas, hosted access protection, HTTPS, production variables and a real hosted response cannot be proved from local source. They remain separate release checks.
+- Installed Gitleaks 8.30.1 scanned all six commits: no leaks found. Semgrep/detect-secrets are not installed and will not be installed silently. Existing ESLint security-rule and targeted source review coverage will be reported precisely.
+- `npm audit` CLI cannot resolve registry DNS in this sandbox. A read-only official Bulk Advisory check of 519 public package names/540 locked versions returned HTTP200 and an empty advisory object; this is not misreported as a successful npm CLI run.
+
+### Checklist
+
+- [x] Read final criteria, submission requirements, current source and relevant security/hosting guidance.
+- [x] Fix capped-session recovery and runtime selection; regression failed before the reset fix and passes after it.
+- [x] Complete tools/manual audit and quality gates with explicit live/mock distinction.
+- [x] Finish acceptance/security/infrastructure/release docs, professional README and three real fresh-browser screenshots.
+- [x] Record exact files/preservation/cleanup and verified changes in this local commit; no push or deployment.
+
+### Phase 5 verification results
+
+- `npm run test`: 125/125 PASS across 12 suites on Node 24.7.0/npm 11.5.1; the added capped-session case covers zero accepted steps, cancel/confirm, restored editing and retained events.
+- `npm run lint`, explicit ESLint security rules, `npm run typecheck` and `npm run build`: PASS. No dependency version or global tool installation changed; only root runtime metadata is pinned 24.x.
+- Owner ran `npm run test:e2e`: 30/30 PASS in 35.2s on desktop/tablet/mobile. The repeated pasted output is the same supplied result, not counted as a second run. `.last-run.json` confirms passed/no failed IDs.
+- Final read-only responsive web-qa: 30/30 PASS across all five routes and six widths, no blocking issues; existing local noindex/canonical warnings remain accepted. Capped confirmation screenshots passed visual review at 1440/768/390, and current populated Study/Home spot checks show no regressions.
+- Three unchanged fresh-app JPEG captures are included under `docs/screenshots/` (136197 bytes total). They show no seeded activity or model prose; the tutor status is Not connected yet. They are not live-AI proof or reference-board copies.
+- Installed Gitleaks 8.30.1 scanned all six pre-handoff commits with full redaction: no leaks found. Explicit ESLint no-eval/no-implied-eval/no-new-func/no-script-url rules pass; Semgrep/detect-secrets are unavailable and not silently installed. No broader SAST claim is made.
+- Official npm Bulk Advisory endpoint returned HTTP200 and an empty advisory object for 519 names/540 locked versions. npm CLI DNS failed; the fallback is recorded precisely. All 544 resolved lock entries use the official registry with integrity hashes; versions are unchanged.
+- The owner explicitly authorized one new live request during Phase 5. Runtime configuration GET returned enabled/configured true. The actual SDK attempt again returned normalized provider_limit (429), with an independent incorrect/distribution verdict, hint level 0, no source model and no guiding question. No automatic retry occurred. Latest key-free result: `/tmp/math-tutor-phase5-live-result.json`.
+- Final staged-diff Gitleaks scan: PASS, no leaks found across the final staged source/documentation text, with full redaction. The separate history scan covered all six pre-handoff commits.
+- Preservation/cleanup: all 13 original SHA-256 hashes still match and none of those files or real env files is tracked. Client static chunks contain no OpenAI key/endpoint identifiers. No listener remains on 3000/4173/4321/5173/8787–8789 and no headless Chrome remains. Owned servers/tests/QA were stopped; IDE processes were left alone. No production records were created.
+- Final acceptance: eight PASS, two NOT_VERIFIED. A real model response/adaptive live conversation and actual hosted protection/HTTPS/runtime/reviewer access remain unresolved external release checks. No public paid-AI deployment should proceed with in-process limits alone.
+
+### Exact Phase 5 change set
+
+16 files changed or added, including three unchanged real UI captures. All original handoff files and real credentials are excluded.
+
+```text
+README.md
+docs/ACCEPTANCE_REPORT.md
+docs/AI_INTEGRATION.md
+docs/IMPLEMENTATION_PROGRESS.md
+docs/INFRASTRUCTURE.md
+docs/RELEASE_GUIDE.md
+docs/SECURITY_REVIEW.md
+docs/screenshots/home-1440-full.jpg
+docs/screenshots/study-1440-full.jpg
+docs/screenshots/study-390-full.jpg
+package-lock.json
+package.json
+src/components/study/study-workspace.tsx
+tests/components/learning-flow.test.tsx
+tests/e2e/learning.spec.ts
+tests/fixtures/learning.ts
+```
+
 ## Next session
 
-Phase 4 is complete and committed. With new owner approval, start Phase 5 from `docs/06_CODEX_PHASE_PROMPTS.md`: strict acceptance/security/release review and deployment preparation. The successful live-AI check still needs restored API access and a separately approved request. Push/deployment remain owner-controlled; never read real secret files.
+The authorized local Phase 5 review, fixes and handoff documentation are complete. The remaining work is external: restore provider access, explicitly approve another successful real-AI verification, configure verified host access/cost controls and authorize owner-controlled publication. Do not present the full assessment as passed or automatically retry/pay/push/deploy. Start from `ACCEPTANCE_REPORT.md`, `SECURITY_REVIEW.md`, `INFRASTRUCTURE.md` and `RELEASE_GUIDE.md`.
