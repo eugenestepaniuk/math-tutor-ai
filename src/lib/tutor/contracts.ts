@@ -24,8 +24,8 @@ export const TutorRequest = z.object({
 export type TutorRequest = z.infer<typeof TutorRequest>;
 
 export const TutorReply = z.object({
-  message: z.string().trim().min(1).max(600),
-  guidingQuestion: z.string().trim().min(1).max(240).nullable(),
+  message: z.string().trim().min(1).max(600).describe("Short plain-English guidance without a question, digits, computed values, formulas or grading claims. Refer to terms and the outside factor rather than actual numeric values."),
+  guidingQuestion: z.string().trim().min(1).max(240).nullable().describe("A single focused question ending in ?. Ask about terms, brackets or both sides without digits, computed values, formulas or an answer."),
   hintLevel: z.number().int().min(0).max(3),
   mathFocus: z.enum(["none", "worked_example"]),
   suggestedNextAction: z.enum(["retry_step", "continue_solution", "ask_clarification", "review_solution"]),
@@ -56,7 +56,12 @@ export const TutorResponse = z.object({
   }),
 });
 export type TutorResponse = z.infer<typeof TutorResponse>;
-export const TutorAvailability = z.object({ enabled: z.boolean(), configured: z.boolean() });
+export const TutorAvailability = z.object({
+  enabled: z.boolean(), configured: z.boolean(),
+  provider: z.enum(["groq", "openai"]).nullable().optional(),
+  model: z.enum(["openai/gpt-oss-20b", "openai/gpt-oss-120b"]).nullable().optional(),
+  freeTierConfirmed: z.boolean().optional(), paidAllowed: z.boolean().optional(),
+});
 
 export const ChatMessage = z.object({
   id: z.string().min(1).max(100), role: z.enum(["student", "tutor", "checker"]),

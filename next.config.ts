@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Preserve the owner's original, private handoff instructions byte for byte.
+  agentRules: false,
   poweredByHeader: false,
   async headers() {
     return [

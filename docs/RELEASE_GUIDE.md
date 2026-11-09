@@ -1,6 +1,6 @@
 # Owner-run publication and reviewer handoff
 
-These are prepared instructions, not executed actions. No remote repository, hosting project, account settings, domain or deployment was created/changed by the agent. A successful genuine-AI demo is not yet verified; read `ACCEPTANCE_REPORT.md` before submitting it as complete.
+These are prepared instructions, not executed actions. No remote repository, hosting project, account settings, domain or deployment was created/changed by the agent. A hosted genuine-AI demo is not yet verified; read `ACCEPTANCE_REPORT.md` before submitting it as complete.
 
 ## 1. Inspect the local release
 
@@ -35,43 +35,45 @@ Do not force-push or overwrite an existing remote/history. If an `origin` alread
 
 Import the chosen repository using the owner's Vercel account. Select Next.js, project root, `npm ci`, `npm run build` and default framework output. The source pins Node 24.x; verify the build uses the intended major. [Node runtime documentation](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions).
 
-Enter only the variable names from `.env.example` in the appropriate Preview/Production environment. Add the key as a server secret using the owner's dashboard, never a public variable. Initially use `TUTOR_ENABLED=false`; choose `OPENAI_MODEL` explicitly or retain its documented default. Changes apply to new deployments, so redeploy after updates. [Environment variables](https://vercel.com/docs/environment-variables).
+Enter only the variable names from `.env.example` in the appropriate Preview/Production environment. Add the key as a server secret using the owner's dashboard, never a public variable. Initially use `TUTOR_ENABLED=false`; use `TUTOR_PROVIDER=groq`, `GROQ_MODEL=openai/gpt-oss-120b`, the Free account key and `TUTOR_ALLOW_PAID=false`. Confirm the actual Free tier before setting `GROQ_FREE_TIER_CONFIRMED=true`. Changes apply to new deployments, so redeploy after updates. [Environment variables](https://vercel.com/docs/environment-variables).
 
 Configure an appropriate access/cost control before enabling paid AI. Check the actual account's available protection methods and costs; no plan entitlement or free password protection is assumed. Standard Protection excludes production domains. Protect all reachable aliases or keep AI disabled on any unprotected deployment. Process-local application limits alone are insufficient. [Deployment Protection](https://vercel.com/docs/deployment-protection).
 
-For external reviewers, use the host's approved sharing mechanism. An invited protected reviewer may need a Vercel login; a sharable link can bypass deployment protection and must be treated as an access credential. It never contains the OpenAI key. Confirm access from a separate browser and revoke sharing after review. [Sharing deployments](https://vercel.com/docs/deployments/sharing-deployments).
+For external reviewers, use the host's approved sharing mechanism. An invited protected reviewer may need a Vercel login; a sharable link can bypass deployment protection and must be treated as an access credential. It never contains a provider key. Confirm access from a separate browser and revoke sharing after review. [Sharing deployments](https://vercel.com/docs/deployments/sharing-deployments).
 
-## 4. Verify hosting before any paid smoke test
+## 4. Verify hosting before a live smoke test
 
-Check `/`, `/study`, `/practice`, `/progress` and `/curriculum` directly, including a refresh and mobile navigation. Confirm real HTTPS, headers, intended Node version and no client-side provider credentials. Test `/api/tutor` GET as an authorized reviewer: configuration booleans only, no model request.
+Check `/`, `/study`, `/practice`, `/progress` and `/curriculum` directly, including a refresh and mobile navigation. Confirm real HTTPS, headers, intended Node version and no client-side provider credentials. Test `/api/tutor` GET as an authorized reviewer: provider/readiness and free/paid assertions only, no model request.
 
-From an unauthenticated client, the following **invalid** request must be rejected by the chosen host/access gate before reaching paid functionality. Replace the reserved example host; this body cannot invoke the model even if the gate is misconfigured:
+If an access gate is configured, verify it from an unauthenticated client. The following **invalid** request must be rejected by that gate; this is required before any future billable AI exposure. Replace the reserved example host; this body cannot invoke the model even if the gate is misconfigured:
 
 ```bash
 curl -i --request POST --header 'Content-Type: application/json' \
   --data '{}' https://reviewer-host.example/api/tutor
 ```
 
-Expect the configured authentication rejection/redirect. An application's400 validation response means the request reached the unprotected route; that is not evidence of a working access gate. Repeat the check for every reachable alias. Keep AI off until the control is actually verified or a suitable shared limiter/access design is implemented.
+Expect the configured authentication rejection/redirect. An application's400 validation response means the request reached the unprotected route; that is not evidence of a working access gate. Repeat the check for every reachable alias. Keep billable AI off until the control is actually verified or a suitable shared limiter/access design is implemented. A Groq Free demo does not require purchasing hosting protection: if exposed publicly without a gate, document shared free quota and limited availability, keep the account without billing/upgrades and retain the existing request bounds. Do not describe process-local limits as durable protection.
 
-## 5. Genuine AI verification — separate authorization
+## 5. Genuine AI verification on the Free plan
 
-The owner must first resolve the prior429 through the actual API account's credits/rate/usage/spend settings. Source code cannot confirm that state, and replacing a key alone does not demonstrate quota. Do not automatically retry an unresolved billing/limit error. The default model remains configurable; do not silently substitute one.
+The current no-payment path is documented in `FREE_AI.md`. Keep Groq on Free, without adding billing or upgrading to Developer, and keep paid OpenAI disabled. The account-confirmation flag is an owner assertion; the application cannot verify a tariff remotely. Exact free quota and availability are provider-controlled. [Groq billing](https://console.groq.com/docs/billing-faqs), [Free quotas](https://console.groq.com/docs/rate-limits).
 
-After approving one paid request and enabling the protected deployment, use the opt-in smoke command for the intended host. Local example:
+After enabling the intended server, run one free-tier smoke test:
 
 ```bash
-npm run smoke:ai -- --allow-paid
+npm run smoke:ai -- --allow-free
 ```
 
-The script accepts `--base=https://reviewer-host.example` for an accessible target. A protected host may require an owner-approved authenticated workflow; do not disable protection or paste a bypass token into chat/logs merely to make the script work. Use the authenticated browser reference flow if needed. Any real step, hint or chat question can consume credits and needs the appropriate authorized test scope.
+The script refuses a non-Groq provider or missing Free confirmation before POST. It accepts `--base=https://reviewer-host.example` for an accessible target. A protected host may require an authenticated workflow; do not disable protection or expose bypass tokens to make a test work. Each real step, hint or chat message uses shared free quota; errors never switch to a paid provider.
 
-Require a model-sourced targeted question for the distribution error, hint level0, no worked answer and the independent `incorrect/distribution` verdict. Local HTTP200/unavailable is not a pass. Verify the actual deployed flow as well as local access, then update the acceptance/infrastructure record with dated evidence. Remove/reset any test history in that disposable browser; there is no server learning database.
+Require a model-sourced targeted question for the distribution error, hint level zero, no worked answer and the independent incorrect/distribution verdict. Local HTTP 200/unavailable is not a pass. Verify progressive hints, correction and free-form questions on the actual deployed flow as well as locally, then record dated evidence. Remove test history in the disposable browser; there is no server learning database.
+
+The optional OpenAI route remains gated by explicit provider choice and a separate paid allowance. The owner's no-payment instruction does not authorize enabling or exercising it; restoring its credits is not a release prerequisite for the Groq workflow.
 
 ## 6. Submission and rollback
 
-Provide a working reviewer URL, source repository, concise architecture explanation and the Web/iOS/Android roadmap from README. Reviewer access uses the owner's server configuration; the employer does not create an OpenAI key. Do not claim successful live tutoring until it has actually passed.
+Provide a working reviewer URL, source repository, concise architecture explanation and the Web/iOS/Android roadmap from README. Reviewer access uses the owner's server configuration; the employer does not create any provider key. Do not claim successful live tutoring until it has actually passed.
 
-If the provider remains unavailable, say so plainly and distinguish deterministic functionality from mocked tutor tests. The genuine-AI requirement is still outstanding; eight local acceptance passes do not imply the full assessment passed.
+If the provider remains unavailable, say so plainly and distinguish deterministic functionality from mocked tutor tests. Use the latest acceptance report to distinguish local model verification from the still-unverified hosted flow.
 
 If release validation fails, keep paid tutoring off and return to a previously verified commit/deployment with protection/env settings checked. See `INFRASTRUCTURE.md` for the shutdown and rollback record. No push or deployment is performed by these notes themselves.

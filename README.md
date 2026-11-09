@@ -2,7 +2,7 @@
 
 An English-language algebra tutor prototype built with Next.js, React and TypeScript. Students submit actual equation transformations; a restricted deterministic engine checks the mathematics, while a separate server-side model adapter supplies Socratic guidance. Related practice and learning events persist in the same browser.
 
-**Live AI status: NOT_VERIFIED.** Two explicitly approved local requests returned a provider-limit error (OpenAI 429), with no tutor prose. Automated tutor tests use clearly separated mock providers. Deterministic checking, generated practice, saved progress and every page work without a key. No hosted demo URL or successful deployed request is claimed.
+**No paid AI account is required.** The default provider is Groq Free with `openai/gpt-oss-120b`. Real local questions, progressive hints, chat, correction and completion have passed the server checks; a separate production-build request also passed. This is a small verified sample, not a reliability guarantee; automated tutor tests remain clearly separated mock scenarios. No hosted demo URL or successful deployed request is claimed. See [free AI setup and evidence](docs/FREE_AI.md).
 
 ## Run locally
 
@@ -18,12 +18,17 @@ Open http://localhost:3000/study. `npm install` is available for development; `n
 For real tutoring, create `.env.local` from `.env.example` only if it does not already exist, then configure it privately in your editor:
 
 ```dotenv
-OPENAI_API_KEY=
-OPENAI_MODEL=gpt-6-luna
+TUTOR_PROVIDER=groq
+GROQ_API_KEY=
+GROQ_MODEL=openai/gpt-oss-120b
+GROQ_FREE_TIER_CONFIRMED=false
 TUTOR_ENABLED=false
+TUTOR_ALLOW_PAID=false
 ```
 
-Enter your own key and explicitly set `TUTOR_ENABLED=true` only for authorized live use, then restart the server. Never expose a key through `NEXT_PUBLIC_*`, browser code, chat or Git. Model access and API credits/limits must actually work; a configured key alone is not proof. No silent model fallback exists. See [AI configuration and the opt-in smoke test](docs/AI_INTEGRATION.md).
+Create a key on the [Groq Free plan](https://console.groq.com/keys), without upgrading or adding billing. Keep that account on Free, enter its key privately, then set `GROQ_FREE_TIER_CONFIRMED=true` and `TUTOR_ENABLED=true`. Restart the server and run `npm run smoke:ai -- --allow-free` to send one real request. The confirmation flag records the owner's account check; the application cannot attest an external billing tier. Free quota exhaustion returns an honest error, never a paid fallback. [Groq billing](https://console.groq.com/docs/billing-faqs), [rate limits](https://console.groq.com/docs/rate-limits).
+
+Never expose a key through `NEXT_PUBLIC_*`, browser code, chat or Git. A configured key alone is not proof of a working model. The legacy OpenAI adapter is retained, explicitly selected only with `TUTOR_PROVIDER=openai`, and blocked unless `TUTOR_ALLOW_PAID=true`; paid OpenAI is not needed for this assessment. See [AI configuration](docs/AI_INTEGRATION.md).
 
 ## Reviewer flow
 
@@ -59,7 +64,7 @@ flowchart LR
   Check --> Math[Restricted exact algebra engine]
   UI --> Tutor[Tutor API]
   Tutor --> Math
-  Tutor --> Model[Server-only OpenAI adapter]
+  Tutor --> Model[Server-only Groq adapter]
   Model --> Prose[Schema-checked guidance]
   Prose --> UI
   UI --> Local[Versioned local learning events]
@@ -89,15 +94,15 @@ npm run build
 npm run test:e2e
 ```
 
-Final local results: **125 tests, 30 browser scenarios**, lint, strict typecheck and production build pass. Browser cases passed in the owner's Terminal in 35.2s across desktop/tablet/mobile, including correction, progressive mock-provider guidance, transfer, refresh, failed requests, keyboard navigation and capped-session recovery. The test server forces live AI off; fixtures are only in `tests/`.
+Current local results: **147 tests, 30 browser scenarios**, lint, strict typecheck and production build pass. The fresh post-provider browser run passed in the owner's Terminal in 39.5s. It covers desktop/tablet/mobile, including correction, progressive mock-provider guidance, transfer, refresh, failed requests, keyboard navigation and capped-session recovery. The test server forces live AI off; fixtures are only in `tests/`.
 
 Read-only responsive QA passes all five routes at 1440/1024/768/390/360/375. Git history was scanned with redacted Gitleaks with no leak found. The official npm advisory endpoint returned an empty advisory set for the locked versions; the npm CLI itself was DNS-blocked. A restricted sandbox cannot run Playwright's localhost server; use an unrestricted Terminal.
 
-The [ten-point acceptance report](docs/ACCEPTANCE_REPORT.md) records **eight PASS and two NOT_VERIFIED**, with exact evidence. The unresolved items are genuine live guidance and actual adaptive model behavior; mocks do not satisfy them. Known tooling/CSP/hosting limits are explicit. [Design comparison](docs/DESIGN_REVIEW.md) and [implementation history/exact files](docs/IMPLEMENTATION_PROGRESS.md) contain supporting details.
+The [ten-point acceptance report](docs/ACCEPTANCE_REPORT.md) records **ten local PASS criteria** with exact evidence. Genuine local model guidance is now verified through Groq; hosted reviewer access and a deployed model response remain unverified. Mock tests remain separate evidence. Known tooling/CSP/hosting limits are explicit. [Design comparison](docs/DESIGN_REVIEW.md) and [implementation history/exact files](docs/IMPLEMENTATION_PROGRESS.md) contain supporting details.
 
 ## Submission, hosting and future platforms
 
-A hosted reviewer uses the owner's server configuration and never receives or creates the OpenAI key. Public hosting has not been executed or verified. The [release guide](docs/RELEASE_GUIDE.md) contains owner-run GitHub/Vercel instructions, protection checks, a separately authorized real smoke test and rollback steps. [Infrastructure](docs/INFRASTRUCTURE.md) records what is planned versus verified. Do not submit the live-AI requirement as complete until it actually passes.
+A hosted reviewer uses the owner's server configuration and never receives or creates a provider key. The demo can use Groq Free within its actual account quota. Public hosting has not been executed or verified. The [release guide](docs/RELEASE_GUIDE.md) contains owner-run GitHub/Vercel instructions, access checks, a free-tier smoke test and rollback steps. [Infrastructure](docs/INFRASTRUCTURE.md) records what is planned versus verified.
 
 Future Web/iOS/Android work would share pure TypeScript domain contracts and a hosted API, with React Native/Expo-specific phone UI rather than a wrapped desktop page. Authenticated backend storage would replace browser-only records for multi-device use. Production work also needs durable usage controls, provider evaluation, appropriate privacy/retention and broader curriculum support. No native app exists now.
 

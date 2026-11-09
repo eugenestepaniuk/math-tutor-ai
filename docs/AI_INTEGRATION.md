@@ -1,33 +1,35 @@
-# AI tutoring — Phase 2
+# AI tutoring
 
-## Status and boundaries
+## Provider decision and current status
 
-The production code uses the official OpenAI Node SDK and Responses Structured Outputs. No mock provider is reachable through a runtime flag or production route. Unit/component/browser tests inject providers only from `tests/`.
+The owner requires a no-payment assessment. Groq Free is now the default provider, using `openai/gpt-oss-120b` through the installed OpenAI SDK and Groq's compatible Responses API. This is a real model service hosted by Groq, not the paid OpenAI API and not a scripted fallback. No mock provider is reachable from a production flag or route. Mathematical validation and pedagogical verification remain independent. See `FREE_AI.md` for setup and dated live evidence.
 
-A successful real AI response is **NOT VERIFIED**. On 2026-11-09, initial configuration checks stopped with AI disabled and made no provider call. After the owner configured a key and `TUTOR_ENABLED=true`, public `GET /api/tutor` confirmed both booleans. Two separately approved requests through the real production route reached the SDK and returned the normalized `provider_limit` result (the adapter maps OpenAI HTTP 429 to this code). The latest Phase 5 request again returned `provider_limit`; neither attempt produced tutor prose and no automatic retry occurred. Latest evidence: `/tmp/math-tutor-phase5-live-result.json`. Configuration and mocked tests do not establish live teaching functionality. The default requested model remains `gpt-6-luna`; no silent substitution is made.
+A real local Groq sequence passed: distribution question, progressive hints at levels one and two, free-form chat, accepted correction and verified completion. A separate production-build request also passed. This verifies a small actual sample, not every possible generated teaching claim. Prior OpenAI attempts returned normalized `provider_limit` (HTTP 429) without tutor prose; those are historical failures, not a reason to fund OpenAI for this free path. No new paid OpenAI attempt is authorized or performed. No hosted demo has been verified.
 
-The local contract correctly retained the independent `incorrect` / `distribution` verdict and hint level zero with no model source or worked example. Local HTTP 200 is the successfully delivered application error envelope, **not** provider success. Evidence is in `/tmp/math-tutor-live-result.json`, with a key-free client-to-local-server transport trace. Real secret files were never inspected.
+## Configuration and one-request smoke test
 
-The adapter currently normalizes rate/quota failures together, so the exact provider subcode is unknown. Official [OpenAI error documentation](https://developers.openai.com/api/docs/guides/error-codes) distinguishes temporary request limits, exhausted credits and organization/project usage or spend limits. Check the relevant API account configuration before authorizing another live attempt. Replacing a key alone does not establish quota availability.
+Use the existing ignored `.env.local` in your own editor. Never expose a key through chat, Git, browser storage or `NEXT_PUBLIC_*`:
 
-Phase 2 adds chat and gradual hints. Phase 3 adds independently generated related practice and versioned browser history. Both sessions persist across refresh; see `LEARNING_PROGRESS.md`. Restoring saved data never calls the model.
+```dotenv
+TUTOR_PROVIDER=groq
+GROQ_API_KEY=
+GROQ_MODEL=openai/gpt-oss-120b
+GROQ_FREE_TIER_CONFIRMED=true
+TUTOR_ENABLED=true
+TUTOR_ALLOW_PAID=false
+```
 
-## Local configuration and one-request smoke test
+Keep the actual Groq account on Free without adding billing/upgrading. The confirmation flag records the owner's tier check; it cannot attest an external account or prevent charges if that account is later upgraded. Only `openai/gpt-oss-120b` and `openai/gpt-oss-20b` are accepted as Groq models, with no silent model/provider fallback. [Groq billing](https://console.groq.com/docs/billing-faqs), [rate limits](https://console.groq.com/docs/rate-limits).
 
-1. In your own editor, configure the ignored `.env.local` with a real `OPENAI_API_KEY`, `OPENAI_MODEL=gpt-6-luna` and `TUTOR_ENABLED=true`. Preserve any existing file; never paste a key into chat or commit it. `.env.example` contains no real key.
-2. Starting/enabling the service does not itself call OpenAI. `GET /api/tutor` only reports configuration booleans. The UI says **Not connected yet** until a successful, verified provider response.
-3. Run `npm run dev -- --hostname 127.0.0.1` in Terminal.
-4. After explicitly approving one model request using API credits, run in another Terminal:
+Restart the server after editing configuration. `GET /api/tutor` reports provider, readiness and free/paid assertions only; it never sends a model request or returns a key. The UI still says Not connected yet until a successful model response.
 
-   ```bash
-   npm run smoke:ai -- --allow-paid
-   ```
+```bash
+npm run smoke:ai -- --allow-free
+```
 
-   Without `--allow-paid`, the script exits before contacting any server. It never reads a secret file or prints a key. The explicit command sends one wrong-distribution fixture to the local server, requires a real model-sourced reply and a targeted question, and rejects unavailable/guarded responses. It prints PASS and the actual guiding question only on success. Automatic SDK retries are disabled.
-5. The manual UI scenario is: wrong expansion → targeted question → Hint → more explicit rule question → Hint → unfinished verified operation → Show worked step → corrected expansion. Free questions use their own composer and do not become algebra attempts. Every additional tutor request may use credits.
-6. Stop the server after checking. Set `TUTOR_ENABLED=false` when live calls should be disabled. Automated browser tests force this value, own their server, and intercept tutor requests with test fixtures where required.
+Without an explicit mode the script makes no HTTP request. Free mode refuses OpenAI and an unconfirmed Free account before POST. It sends one fixed distribution mistake, requires a real model-sourced targeted question with no worked answer and prints PASS only after all checks. No SDK retry is enabled. A failed or guarded response is not a successful AI answer. The script accepts `--base=` for an accessible target; hosted success is separate from local success.
 
-The API key needs separate OpenAI API access/billing. A successful request is the actual account/model-access check; configuration alone is not proof. A missing key, disabled flag, unsupported model, provider refusal, exhausted quota or timeout remains an honest unavailable state. No silent model fallback is used.
+The legacy OpenAI adapter retains `OPENAI_API_KEY`, configurable `OPENAI_MODEL` (default `gpt-6-luna`) and `store:false`. It requires explicit `TUTOR_PROVIDER=openai` and `TUTOR_ALLOW_PAID=true`, in addition to enabling tutoring. It is never selected as a fallback. Its `--allow-paid` smoke mode is retained for explicit future authorization, not needed for this assessment.
 
 ## Data flow and contracts
 
@@ -55,11 +57,11 @@ History is replayable client-supplied session data, not a cryptographically atte
 ## Errors, retries and limits
 
 - API inputs: at most 64 actions including the current one; equations 256 characters; questions 800 characters; transcript at most eight messages of 900 characters; actual streamed body limited to 64 KiB. Model context is further trimmed to recent attempts/conversation.
-- Provider: fixed official API base URL, configurable model, low reasoning effort, 1,200 maximum output tokens, 15-second server deadline, no automatic retries, `store: false`. This storage flag does not make claims about all provider retention policies.
+- Provider: fixed official API base URL, configurable model, low reasoning effort, 1,200 maximum output tokens, 15-second server deadline, no automatic retries. The optional OpenAI adapter uses `store:false`; Groq omits that unsupported request field. Neither statement proves every provider retention policy.
 - Client: separate math/chat drafts, loading state and duplicate-submission guards, a 20-second tutor deadline, preserved text on provider failure, and explicit retry.
 - Retry reuses the same action ID and original context. A bounded two-minute in-process cache joins concurrent identical requests and reuses successful replies. Failed replies can be retried; changed content under a cached ID is rejected.
 - Best-effort process limits allow at most two concurrent provider calls and thirty calls per minute. This is **not** durable/global serverless rate limiting or a provider billing hard cap. Before public deployment, add an appropriate durable limit/access gate and account-level spending controls.
-- SDK logging is explicitly disabled. Raw SDK errors, secret values, student messages and internal stack traces are not logged or returned. There are no accounts, payments or production records in this phase.
+- SDK logging is explicitly disabled. Policy rejection logs contain only a fixed reason identifier, never student/model prose. Raw SDK errors, secret values, student messages and internal stack traces are not logged or returned. There are no accounts, payments or production records in this phase.
 
 ## Verification
 
@@ -78,6 +80,9 @@ npm run test:e2e
 See `IMPLEMENTATION_PROGRESS.md` for exact results and live smoke-test status.
 
 ## Official documentation checked
+
+- [Groq Responses API and Zod parsing](https://console.groq.com/docs/responses-api)
+- [Groq strict Structured Outputs](https://console.groq.com/docs/structured-outputs)
 
 - [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs)
 - [OpenAI TypeScript SDK](https://developers.openai.com/api/reference/typescript)

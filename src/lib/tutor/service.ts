@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { jsonReply, readJsonBody, RequestError, requireJsonRequest } from "@/lib/server/http";
 import { TutorRequest, TutorResponse, type TutorErrorCode } from "./contracts";
-import { teachingContext, safeTutorReply, type TeachingContext } from "./policy";
+import { teachingContext, safeTutorReply, tutorReplyIssue, type TeachingContext } from "./policy";
 import { createTutorLimit } from "./limits";
 
 export class TutorProviderError extends Error {
@@ -53,6 +53,8 @@ export function createTutorHandler(provider: TutorProvider, now: () => number = 
       const value = await Promise.race([provider.generate(data, context, combined), canceled]);
       const reply = safeTutorReply(value, context);
       if (!reply) {
+        // Fixed policy reason only: never log student text, model prose or SDK errors.
+        console.warn("Tutor guidance rejected:", tutorReplyIssue(value, context));
         const fallback = unavailable(context, "invalid_guidance");
         return { ...fallback, tutor: { ...fallback.tutor, status: "guarded", source: "checker" } };
       }

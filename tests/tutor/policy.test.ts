@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { TutorRequest } from "@/lib/tutor/contracts";
-import { safeTutorReply, teachingContext } from "@/lib/tutor/policy";
+import { safeTutorReply, teachingContext, tutorReplyIssue } from "@/lib/tutor/policy";
 import { tutorInput, TUTOR_INSTRUCTIONS } from "@/lib/tutor/prompt";
 import { verifiedExample } from "@/lib/tutor/examples";
 import { checkStep, STARTER_EQUATION } from "@/lib/math/verifier";
@@ -71,6 +71,25 @@ describe("guarded model prose and server-owned mathematical examples", () => {
   const context = teachingContext(tutorRequest(stepAction("3x+4=2x+19")));
   it("accepts valid structured Socratic guidance", () => {
     expect(safeTutorReply(fixtureReply(context), context)).not.toBeNull();
+  });
+  it("distinguishes a Socratic distribution question from an affirmative grading claim", () => {
+    const reply = { ...fixtureReply(context), guidingQuestion: "Have you multiplied each term inside the brackets by the outside factor?" };
+    expect(safeTutorReply(reply, context)).not.toBeNull();
+    expect(safeTutorReply({ ...reply, guidingQuestion: "Since you multiplied every term, what should you do next?" }, context)).toBeNull();
+  });
+  it("reports fixed rejection reasons without including rejected prose", () => {
+    const reply = { ...fixtureReply(context), message: "The factor is two." };
+    expect(tutorReplyIssue(reply, context)).toBe("number_word_two");
+    expect(safeTutorReply(reply, context)).toBeNull();
+    expect(tutorReplyIssue({ ...reply, message: "Try the rule.", guidingQuestion: "Does the factor become seven?" }, context)).toBe("number_word_seven");
+  });
+  it("allows generic structural counts but still blocks numeric answers and factors", () => {
+    expect(safeTutorReply({ ...fixtureReply(context), message: "Apply the factor to the two terms, then consider both sides." }, context)).not.toBeNull();
+    expect(safeTutorReply({ ...fixtureReply(context), message: "Consider each one of the terms, one at a time." }, context)).not.toBeNull();
+    expect(safeTutorReply({ ...fixtureReply(context), message: "Consider the product involving the constant, then the one involving the variable." }, context)).not.toBeNull();
+    for (const message of ["The factor is two.", "The variable becomes one.", "The answer is two.", "Multiply by seven.", "The value is one term minus two."]) {
+      expect(safeTutorReply({ ...fixtureReply(context), message }, context)).toBeNull();
+    }
   });
   it.each([
     "Your step is correct.", "That step is wrong.", "The answer is seven.", "Use x = 7.",

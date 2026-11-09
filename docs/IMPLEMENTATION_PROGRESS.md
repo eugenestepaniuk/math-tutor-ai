@@ -2,7 +2,7 @@
 
 ## Current boundary
 
-The authorized local Phase 5 work is complete: the capped-session reset and deployment-runtime issues are fixed; 125 tests, 30 browser scenarios, lint/typecheck/build and final responsive review pass. Security, acceptance, infrastructure and release notes plus real UI captures are included. Acceptance remains eight PASS/two NOT_VERIFIED because both approved real-provider attempts returned 429 without tutor guidance. No extra paid call, push, hosting change or deployment is authorized.
+Phases 0–5 are locally implemented. The owner then required a no-payment AI path: Groq Free / GPT-OSS 120B is now default, with paid OpenAI blocked unless separately selected and allowed. Real local questions, progressive hints, chat, correction and completion plus a production-build request pass. Current checks: 147 tests, the owner's fresh 30-case browser run (39.5s) and lint/typecheck/build pass. All ten local acceptance criteria now have passing evidence; hosting remains unverified. No paid call, push or deployment was performed. Start with FREE_AI.md and ACCEPTANCE_REPORT.md.
 
 ## Initial audit — 2026-11-08
 
@@ -635,6 +635,56 @@ tests/e2e/learning.spec.ts
 tests/fixtures/learning.ts
 ```
 
+## No-payment AI follow-up — 2026-11-09
+
+### Scope and implementation
+
+The owner rejected paying for the unpaid assessment. Research of official Gemini/Groq documentation selected Groq Free, reusing the installed SDK and requiring no package installation. The initial GPT-OSS 20B trial was less reliable under the prose policy; GPT-OSS 120B became the explicit default. Both supported Groq model IDs remain configurable, with no automatic switch on failure.
+
+- Added separate Groq adapter and a server-owned provider selector. Fixed endpoints and distinct keys prevent cross-provider credential reuse. Free defaults ignore the legacy OpenAI key even when the old enabled flag remains true.
+- Require owner confirmation of the actual Groq Free tier. This is a configuration assertion, not an external billing lookup. Stay on Free without billing/upgrades; exact quotas/availability are provider-controlled.
+- Paid OpenAI requires explicit selection and TUTOR_ALLOW_PAID=true. Free errors never fall back to a paid key/model. No paid provider request is authorized by this follow-up.
+- Added --allow-free smoke mode, which rejects incompatible provider/tier configuration before POST; no mode means no HTTP request. Readiness metadata contains only provider, an allowlisted Groq model and readiness/free/paid assertions.
+- Bind model teaching metadata to exact server facts through strict schema constants. Preserve independent verdicts, checked examples, bounded input/output, disabled SDK retries/logging and existing draft/idempotency behavior.
+- Refine the conservative prose guard for targeted distribution questions and generic structural counts/pronouns. Numeric values, formulas, premature answers and grading contradictions remain rejected. Fixed rejection identifiers support diagnostics without persistent raw text logs.
+- Disable Next agentRules after dev appended a managed block to original AGENTS.md. The framework removed the block; all original hashes were restored and are checked again before commit.
+- Preserve the original handoff/reference files, real secret files and existing dependencies. No UI component/style changes, no mock runtime provider and no source-only AI-success claim.
+
+### Verification and actual evidence
+
+- 147 tests across 13 suites PASS; lint, strict typecheck and production build PASS. Added real-SDK/fake-network coverage of endpoint/key isolation, default/invalid/paid modes, strict per-state schema, error mapping and no retries/fallback, plus smoke-script guards and policy regressions.
+- Live Groq: six interaction stages passed (initial error, hint one, hint two, contextual question, accepted correction, completion). A separate current production-build request also passed. State and model output were verified over local HTTP, with no key file read. See FREE_AI.md for the exact small-sample limits and guarded development responses.
+- No paid OpenAI request was made; the historical 429 failures are superseded as the release path, not relabeled as successes.
+- The actual CLI smoke request was blocked by sandbox local-fetch EPERM. The equivalent production HTTP fixture passed through the allowed transport. The sandbox Playwright run was blocked before scenarios by listen EPERM. The owner then ran npm run test:e2e in Terminal: all 30 cases passed in 39.5s; the fresh .last-run.json confirms passed/no failures.
+- UI/CSS are unchanged; the existing five-route, six-width visual review remains the layout baseline. The browser suite also covers responsive populated views.
+- No package/lockfile changed; no install or repeat dependency audit was needed. The earlier same-day advisory result still applies to unchanged versions. Redacted Gitleaks history scanned seven existing commits with no leaks; the staged scan also found no leaks across all 21 changed files. All 13 original hashes match, no original or real env file is tracked, and the exact change list matches staging. Client chunks contain no provider key/endpoint identifiers. No listener remains on the required ports and no headless Chrome remains; all owned processes were stopped.
+
+### Exact follow-up change set
+
+```text
+.env.example
+README.md
+docs/ACCEPTANCE_REPORT.md
+docs/AI_INTEGRATION.md
+docs/FREE_AI.md
+docs/IMPLEMENTATION_PROGRESS.md
+docs/INFRASTRUCTURE.md
+docs/RELEASE_GUIDE.md
+docs/SECURITY_REVIEW.md
+next.config.ts
+scripts/smoke-tutor.mjs
+src/app/api/tutor/route.ts
+src/lib/tutor/contracts.ts
+src/lib/tutor/groq-provider.ts
+src/lib/tutor/policy.ts
+src/lib/tutor/prompt.ts
+src/lib/tutor/provider.ts
+src/lib/tutor/service.ts
+tests/tutor/groq-provider.test.ts
+tests/tutor/policy.test.ts
+tests/tutor/smoke-opt-in.test.ts
+```
+
 ## Next session
 
-The authorized local Phase 5 review, fixes and handoff documentation are complete. The remaining work is external: restore provider access, explicitly approve another successful real-AI verification, configure verified host access/cost controls and authorize owner-controlled publication. Do not present the full assessment as passed or automatically retry/pay/push/deploy. Start from `ACCEPTANCE_REPORT.md`, `SECURITY_REVIEW.md`, `INFRASTRUCTURE.md` and `RELEASE_GUIDE.md`.
+Review FREE_AI.md and ACCEPTANCE_REPORT.md; the local implementation and current regression checks are complete. The remaining external work is owner-authorized publication and actual hosted reviewer access/model verification using the Free account. Do not fund/retry paid OpenAI, upgrade Groq, read a real key file, push or deploy automatically. Configure and verify actual hosting/quota controls without assuming any paid plan entitlement.
