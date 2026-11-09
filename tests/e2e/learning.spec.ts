@@ -89,11 +89,13 @@ test("populated learning views stay responsive without submitting or calling AI"
   const widths = info.project.name === "desktop" ? [1440, 1024, 360, 375] : info.project.name === "tablet" ? [768] : [390];
   for (const width of widths) {
     await page.setViewportSize({ width, height: 960 });
-    for (const path of ["study", "practice", "progress"]) {
-      await page.goto(`/${path}`);
+    for (const path of ["home", "study", "practice", "progress", "curriculum"]) {
+      await page.goto(path === "home" ? "/" : `/${path}`);
+      if (path === "home") await metric(page, "Checked attempts", "5");
       if (path === "study") await expect(page.getByRole("link", { name: "Try related practice" })).toBeVisible();
       if (path === "practice") await expect(page.getByText("1 accepted step", { exact: true })).toBeVisible();
       if (path === "progress") { await metric(page, "Completed exercises", "1"); await metric(page, "Attempts", "5"); }
+      if (path === "curriculum") await expect(page.getByRole("progressbar", { name: "Available lesson completion" })).toHaveJSProperty("value", 1);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
       if (width <= 1024) expect(await page.locator("input:visible, textarea:visible").evaluateAll(nodes => nodes.filter(node => Number.parseFloat(getComputedStyle(node).fontSize) < 16).length)).toBe(0);
       await page.screenshot({ path: info.outputPath(`populated-${path}-${width}.png`), fullPage: true });

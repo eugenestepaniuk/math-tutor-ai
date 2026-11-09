@@ -5,11 +5,11 @@ import { useState } from "react";
 import { ArrowRight, ChartNoAxesColumnIncreasing, CheckCircle2, Lightbulb, Target, Trash2 } from "lucide-react";
 import { useLearning } from "./learning-provider";
 import { learningStats, type MistakeKind } from "@/lib/learning/events";
+import { categoryLabels } from "./learning-labels";
 import { PageHeading } from "@/components/ui/page-heading";
 import { Card } from "@/components/ui/card";
 import { useStudySession } from "@/components/study/study-session";
 
-const categoryLabels: Record<MistakeKind, string> = { distribution: "Distributive property", combine_like_terms: "Combining like terms", sign_or_balance: "Signs and balance", arithmetic: "Arithmetic", unsupported_step: "Other non-equivalent steps" };
 export function ProgressView() {
   const learning = useLearning();
   const study = useStudySession();

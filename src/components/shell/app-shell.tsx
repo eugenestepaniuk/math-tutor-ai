@@ -26,6 +26,7 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const page = navigation.find(({ href }) => href === pathname);
+  const algebraPage = pathname === "/study" || pathname === "/practice";
 
   return (
     <div className="app-shell">
@@ -43,18 +44,18 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="app-body">
         <header className="topbar">
           <Link className="mobile-brand brand-link" href="/" aria-label="MathTutor AI home"><Brand /></Link>
-          <div className="page-context">
-            <span>{pathname === "/study" ? "Algebra" : "Workspace"}</span>
-            <ChevronRight size={14} aria-hidden="true" />
-            <span className="context-current">{pathname === "/study" ? "Linear Equations" : page?.label ?? "Page not found"}</span>
-          </div>
+          <nav className="page-context" aria-label="Breadcrumb">
+            {algebraPage ? <><Link href="/curriculum">Algebra</Link><ChevronRight size={14} aria-hidden="true" /><Link href="/curriculum#linear-equations">Linear equations</Link><ChevronRight size={14} aria-hidden="true" /></>
+              : pathname !== "/" && <><Link href="/">Home</Link><ChevronRight size={14} aria-hidden="true" /></>}
+            <span className="context-current" aria-current="page">{pathname === "/study" ? "Solving equations" : page?.label ?? "Page not found"}</span>
+          </nav>
           <div className="guest-label"><CircleUserRound size={20} aria-hidden="true" /><span>Guest</span></div>
         </header>
         <main id="main-content" className="main-content" tabIndex={-1}>
           <StorageNotice />
           {children}
         </main>
-        <footer className="workspace-footer"><span>MathTutor AI</span><span>Workspace preview</span></footer>
+        <footer className="workspace-footer"><span>MathTutor AI</span><span>Understand every step.</span></footer>
       </div>
       <Navigation mobile />
     </div>

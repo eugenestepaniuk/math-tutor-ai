@@ -2,7 +2,7 @@
 
 ## Current boundary
 
-Phase 3 was approved by the owner on 2026-11-09 after Phase 2 commit `5b50a3b`. Related practice, real event statistics and versioned local persistence are implemented. Phase 3 is complete: 119 unit/API/component/SDK tests, lint, strict typecheck, production build and all 21 owner-terminal browser scenarios pass. Fresh responsive QA passes 30 combinations, and populated visual review passes 18 combinations. Successful live AI remains NOT VERIFIED: one approved production-route attempt returned `provider_limit` (OpenAI 429), with no tutor prose and no automatic retry. Phase 4 is not authorized.
+Phase 4 is complete and verified following owner approval on 2026-11-09. Home/Curriculum, real saved-data cards, navigable breadcrumbs and supporting-view polish are implemented. 124 tests, lint, strict typecheck, production build and all 27 browser scenarios pass. Fresh responsive QA passed 30 combinations plus two reduced-motion checks; new populated Home/Curriculum layouts passed visual review at all six widths. Live AI remains NOT VERIFIED after the prior provider-limited attempt. No Phase 4 model request, push or deployment was made. Phase 5 is not authorized.
 
 ## Initial audit — 2026-11-08
 
@@ -484,6 +484,77 @@ tests/learning/problems.test.ts
 tests/tutor/smoke-opt-in.test.ts
 ```
 
+
+## Phase 4 — Home, Curriculum and visual polish
+
+### Plan and proposed files
+
+1. Preserve the existing math, tutoring and persistence contracts; inspect the clean worktree and both original reference boards.
+2. Build a blue editorial Home hero with original SVG/CSS mathematical artwork, Continue learning, real event metrics, the saved current equation and relevant practice.
+3. Replace Curriculum's pending screen with the implemented linear-equations lesson, truthful available-lesson completion and clearly noninteractive Coming later topics.
+4. Refine real breadcrumbs, loading/empty states, mobile composition and the recorded related-card spacing gap. Reuse all established tokens and short reduced-motion-safe feedback.
+5. Verify current/reloaded data, CTAs and navigation with meaningful component/browser coverage; run lint/typecheck/tests/build and responsive QA. Update docs and make one local Conventional Commit. Stop before Phase 5.
+
+```text
+src/components/learning/
+  home-dashboard.tsx       # Home hero, actual metrics and saved lesson/practice
+  curriculum-view.tsx      # One working lesson and explicit future-topic states
+src/app/{page,curriculum/page}.tsx
+src/components/shell/app-shell.tsx  # Real navigable breadcrumbs
+src/app/globals.css        # Home/Curriculum composition and shared polish
+tests/components/dashboard.test.tsx
+tests/e2e/dashboard.spec.ts
+docs/IMPLEMENTATION_PROGRESS.md
+docs/DESIGN_REVIEW.md     # Reference comparison and intentional differences
+```
+
+### Design decisions
+
+- Preserve the approved blue/violet, pale surfaces, Inter/KaTeX and rounded card system. Existing project timing wins over generic skill defaults: short interaction feedback, no decorative animation or new dependencies.
+- Board 01 supplies the broad blue hero and dashboard grouping; implementation-owned geometry/formula cards replace the stock statue. No guessed nickname, social proof or screenshot metrics.
+- Board 02 continues to govern Study's problem-left/tutor-right composition and compact supporting views. No fake avatar, XP, search, subscriptions, tabs or locked courses.
+- Home data comes from actual persisted events/current sessions. Curriculum completion is only the available lesson's verified final value, not an estimate of mastery or an imagined multi-lesson percentage.
+
+### Checklist
+
+- [x] Inspect git status, applicable docs and both original PNG boards.
+- [x] Implement Home/Curriculum, navigable breadcrumbs, related-card spacing and accessible interaction states.
+- [x] 124 unit/API/component/SDK tests, 27 browser scenarios, lint/typecheck/build and fresh/populated responsive review pass.
+- [x] Exact file list, preservation/cleanup evidence and verified Phase 4 change set included in this commit.
+- [x] Stop before Phase 5; no paid API request, push or deployment.
+
+### Verification results
+
+- `npm run test`: 124/124 PASS across 12 suites. Home/Curriculum cases verify real zero/populated values, click-only related practice, noninteractive future topics and completion retained after a solution reset.
+- `npm run lint`: PASS with zero warnings. `npm run typecheck`: PASS including the new browser definitions.
+- `npm run build`: PASS after final CSS changes, with all five routes and both Node API handlers. One earlier run found an unsupported test-selector option; that option was corrected and the clean rebuild passed.
+- Fresh responsive QA: first run 30/30 PASS across all five pages at 1440/1024/768/390/360/375, no blocking issues. Home/Curriculum desktop/tablet/phone comparison matches the approved hierarchy. Final run after tap/disabled-state polish also passed 30/30, with no blocking issues. Home/Curriculum reduced-motion375 checks passed 2/2. Evidence: `/tmp/math-tutor-phase4-web-qa-final/` and `/tmp/math-tutor-phase4-reduced-motion-final/`; the small breadcrumb finding is resolved and the prior isolated logo/canonical notes remain accepted.
+- Browser suite: owner ran `npm run test:e2e` in unrestricted Terminal: 27/27 PASS in 35.5 seconds. Includes keyboard continuation, draft preservation, actual saved Home/Curriculum values, preserved practice and existing reference/tutor/transfer/error/retry flows. `test-results/.last-run.json` confirms `passed` with no failed IDs. All 30 populated captures exist for five pages × six widths. Home/Curriculum were visually reviewed at every width (12 layouts); Study1440/390 and Practice/Progress390 spot checks passed. No blockers were found, and the related-card gap is fixed. Evidence: `test-results/learning-populated-learnin-56961-ut-submitting-or-calling-AI-{desktop,tablet,mobile}/populated-{page}-{width}.png`, plus `/tmp/math-tutor-phase4-populated-transitions.png` and `/tmp/math-tutor-phase4-populated-spots.png`. The test server forces live AI off, so the suite made no paid calls.
+- Preservation/cleanup: all 13 original SHA-256 hashes match; none of those files or `.env.local` is tracked. Client static chunks contain no OpenAI key/endpoint identifiers. Owned production servers and QA Chrome were stopped; Playwright closed its test server/browser after the owner run. Only disposable test-browser data was used; no production records were created. Existing IDE processes were left alone.
+- No new AI request, dependency install, push or deployment. Prior provider-limited live result remains NOT VERIFIED; test mocks are not live proof.
+
+### Exact Phase 4 change set
+
+15 source/style/documentation/test files added or updated. All original handoff files and real credentials are excluded.
+
+```text
+README.md
+docs/DESIGN_REVIEW.md
+docs/IMPLEMENTATION_PROGRESS.md
+src/app/curriculum/page.tsx
+src/app/globals.css
+src/app/page.tsx
+src/components/learning/curriculum-view.tsx
+src/components/learning/home-dashboard.tsx
+src/components/learning/learning-labels.ts
+src/components/learning/progress-view.tsx
+src/components/shell/app-shell.tsx
+tests/components/dashboard.test.tsx
+tests/e2e/dashboard.spec.ts
+tests/e2e/learning.spec.ts
+tests/e2e/study.spec.ts
+```
+
 ## Next session
 
-Phase 3 is complete and verified. With new owner approval, start Phase 4 from `docs/06_CODEX_PHASE_PROMPTS.md`: Home/Curriculum design and supporting-view polish; include the related-card spacing follow-up. The live attempt remains honestly provider-limited, so a successful real-AI check still requires restored API access and a separately approved new request. Do not repeat paid calls automatically, inspect real secret files, push or deploy without authorization.
+Phase 4 is complete and committed. With new owner approval, start Phase 5 from `docs/06_CODEX_PHASE_PROMPTS.md`: strict acceptance/security/release review and deployment preparation. The successful live-AI check still needs restored API access and a separately approved request. Push/deployment remain owner-controlled; never read real secret files.

@@ -15,7 +15,7 @@ test("mistake, correction, alternative steps, navigation and completion", async 
   await expect(page.getByText("1 accepted step", { exact: true })).toBeVisible();
   const nav = page.locator("nav:visible").filter({ has: page.getByRole("link", { name: "Home", exact: true }) });
   await nav.getByRole("link", { name: "Home", exact: true }).click();
-  await page.getByRole("link", { name: "View study workspace", exact: true }).click();
+  await page.getByRole("link", { name: "Continue learning", exact: true }).click();
   await expect(page.getByText("1 accepted step", { exact: true })).toBeVisible();
   for (const equation of ["3x-2x=19-12", "x=7"]) {
     await input.fill(equation); await input.press("Enter");
