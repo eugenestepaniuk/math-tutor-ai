@@ -2,7 +2,7 @@
 
 ## Current boundary
 
-Phases 0–5 are locally implemented. The owner then required a no-payment AI path: Groq Free / GPT-OSS 120B is now default, with paid OpenAI blocked unless separately selected and allowed. Real local questions, progressive hints, chat, correction and completion plus a production-build request pass. Current checks: 147 tests, the owner's fresh 30-case browser run (39.5s) and lint/typecheck/build pass. All ten local acceptance criteria now have passing evidence; hosting remains unverified. No paid call, push or deployment was performed. Start with FREE_AI.md and ACCEPTANCE_REPORT.md.
+Phases 0–5 are locally implemented. The owner then required a no-payment AI path: Groq Free / GPT-OSS 120B is now default, with paid OpenAI blocked unless separately selected and allowed. Real local questions, progressive hints, chat, correction and completion plus a production-build request pass. Current checks: 147 tests, the owner's fresh 30-case browser run (39.5s) and lint/typecheck/build pass. All ten local acceptance criteria now have passing evidence; the owner has since published the Vercel demo; public responsive routes and a hosted model response pass, and the owner confirmed the manual browser flow. No paid call, push or deployment was performed. Start with FREE_AI.md and ACCEPTANCE_REPORT.md.
 
 ## Initial audit — 2026-11-08
 
@@ -685,6 +685,30 @@ tests/tutor/policy.test.ts
 tests/tutor/smoke-opt-in.test.ts
 ```
 
+## Published demo and employer handoff — 2026-11-09
+
+The owner published https://math-tutor-ai-black.vercel.app/. Initial readiness was configured but disabled; after the owner enabled tutoring and redeployed, the configuration showed Groq / GPT-OSS 120B, enabled/configured true, Free confirmation true and paid allowance false. The agent did not push or deploy.
+
+- Direct hosted API evidence: one fixed distribution-mistake request returned ready/model, independent incorrect/distribution, hint depth zero, no worked answer and a targeted question. Evidence: `/tmp/math-tutor-vercel-live-result.json`.
+- Hosted responsive QA: all five routes × five widths passed (25/25, zero blockers); public access required no Vercel sign-in. No form/model calls occurred in that read-only run. Evidence: `/tmp/math-tutor-vercel-web-qa/`. Chrome cleanup was confirmed.
+- Browser behavior: the owner reported the manual website scenario worked. This is owner-reported evidence, not a claim that the agent automated the complete hosted conversation. No server learning record was created by the API probe.
+- Submission requirements: the employer's original message lists a working demo or runnable project, source code and a brief technical approach. A separate mobile implementation, PDF or video is not required by that message. The optional cross-platform roadmap remains in README.
+- Updated the public demo URL and evidence across the handoff documentation. The GitHub URL has not been supplied to the agent; the owner should include the accessible repository link in their submission.
+- Documentation-only update: runtime source, dependencies and test code are unchanged. Existing 147 tests/30 browser scenarios/lint/typecheck/build remain the last code validation; this update checks relative links, staged formatting, secret scanning and original-file preservation instead of repeating code tests.
+
+### Exact published-demo documentation change set
+
+```text
+README.md
+docs/ACCEPTANCE_REPORT.md
+docs/AI_INTEGRATION.md
+docs/FREE_AI.md
+docs/IMPLEMENTATION_PROGRESS.md
+docs/INFRASTRUCTURE.md
+docs/RELEASE_GUIDE.md
+docs/SECURITY_REVIEW.md
+```
+
 ## Next session
 
-Review FREE_AI.md and ACCEPTANCE_REPORT.md; the local implementation and current regression checks are complete. The remaining external work is owner-authorized publication and actual hosted reviewer access/model verification using the Free account. Do not fund/retry paid OpenAI, upgrade Groq, read a real key file, push or deploy automatically. Configure and verify actual hosting/quota controls without assuming any paid plan entitlement.
+The prototype demo and current acceptance flow are verified at the documented evidence levels. The owner should publish this documentation commit and send the demo URL, accessible source URL and short technical approach to the employer. Keep Groq on Free; future production hardening is separate from the assessment. Never read a real key file, enable paid fallback, push or deploy automatically.

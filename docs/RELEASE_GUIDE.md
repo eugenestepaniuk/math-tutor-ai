@@ -1,6 +1,6 @@
 # Owner-run publication and reviewer handoff
 
-These are prepared instructions, not executed actions. No remote repository, hosting project, account settings, domain or deployment was created/changed by the agent. A hosted genuine-AI demo is not yet verified; read `ACCEPTANCE_REPORT.md` before submitting it as complete.
+The owner has published the [Vercel demo](https://math-tutor-ai-black.vercel.app/study). Public responsive routes and a real hosted Groq response passed; the owner confirmed the manual browser flow. This guide documents the release process. The agent did not push, deploy or change account/billing settings. Read ACCEPTANCE_REPORT.md and INFRASTRUCTURE.md for evidence and scope.
 
 ## 1. Inspect the local release
 
@@ -74,6 +74,10 @@ The optional OpenAI route remains gated by explicit provider choice and a separa
 
 Provide a working reviewer URL, source repository, concise architecture explanation and the Web/iOS/Android roadmap from README. Reviewer access uses the owner's server configuration; the employer does not create any provider key. Do not claim successful live tutoring until it has actually passed.
 
-If the provider remains unavailable, say so plainly and distinguish deterministic functionality from mocked tutor tests. Use the latest acceptance report to distinguish local model verification from the still-unverified hosted flow.
+If the provider remains unavailable, say so plainly and distinguish deterministic functionality from mocked tutor tests. Use the latest acceptance report to distinguish local model verification from the directly checked API/QA results, owner-reported browser flow and remaining account-level limits.
 
 If release validation fails, keep paid tutoring off and return to a previously verified commit/deployment with protection/env settings checked. See `INFRASTRUCTURE.md` for the shutdown and rollback record. No push or deployment is performed by these notes themselves.
+
+## Employer handoff
+
+The employer's original What to Submit message requires three items: a working demo/runnable project, source code and a brief technical approach. Put the live URL and accessible GitHub URL in the submission message, followed by a short explanation of Next.js/TypeScript, independent algebra validation, Groq-generated Socratic guidance and browser-local progress. The README contains setup, test flow and limitations. A separate video, PDF or native app is not listed as a required deliverable in that message.

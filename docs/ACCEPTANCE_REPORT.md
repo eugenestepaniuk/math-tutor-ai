@@ -7,7 +7,7 @@ Reviewed on 2026-11-09. This report distinguishes local evidence, mock-provider 
 | # | Criterion | Status | Evidence and limits |
 | --- | --- | --- | --- |
 | 1 | Faithful, usable responsive interface | PASS | All five routes passed read-only web-qa at 1440/1024/768/390/360/375; reference comparison is in `DESIGN_REVIEW.md`. Actual fresh screenshots are committed under `screenshots/`. |
-| 2 | Genuine live model guidance | PASS | Groq Free / GPT-OSS 120B returned actual model-sourced targeted questions locally and in a separate production-build request. See FREE_AI.md. The prior paid-OpenAI 429 failures remain historical failures; no hosted success is claimed. |
+| 2 | Genuine live model guidance | PASS | Groq Free / GPT-OSS 120B returned actual model-sourced targeted questions locally and in a separate production-build request. See FREE_AI.md. The prior paid-OpenAI 429 failures remain historical failures; a hosted Groq distribution question has also passed, and the owner confirmed the hosted manual flow. |
 | 3 | Independent mathematical validation | PASS | Pure restricted parser, exact rational solver and server-side history replay. Unit/API tests M01–M16; no model verdict is trusted. |
 | 4 | Specific distribution error detected | PASS | `3(x+4)=2x+19` → `3x+4=2x+19` gives `incorrect/distribution`, with generalized positive/negative coefficient fixtures. Both live-error envelopes retained this independent verdict. |
 | 5 | Adaptive, one-question-at-a-time real tutoring | PASS | Actual Groq responses covered the initial distribution mistake, progressive hint depths one/two, a free-form why question, an accepted correction and completion. Examples/verdicts remain server-owned. Guarded development replies were rejected honestly; this is a small observed sample, not a reliability guarantee. |
@@ -17,7 +17,7 @@ Reviewed on 2026-11-09. This report distinguishes local evidence, mock-provider 
 | 9 | Honest data and functional navigation | PASS | Fresh zero/empty states, saved Home metrics, one real Curriculum lesson and static Coming later topics; browser keyboard/draft/practice-preservation tests. No fake online status, XP or subscriptions. |
 | 10 | Failure handling, runnable source and scaling explanation | PASS | 147 unit/API/component/SDK tests plus lint/typecheck/build pass. The owner's fresh post-provider run passed all 30 browser cases in 39.5s. Docs/roadmap are included; public hosting is a separate external check. |
 
-**Current local result: ten PASS.** The two previously unverified local AI criteria now have real Groq evidence. A hosted demo and its exact reviewer access/model flow remain NOT_VERIFIED; no deployed readiness is claimed.
+**Current local result: ten PASS.** The two previously unverified local AI criteria now have real Groq evidence. The owner published the Vercel demo and confirmed the manual browser flow. The agent independently verified public routes, 25 responsive combinations and an actual hosted model response. Account settings/runtime patch/other aliases were not audited; this is prototype verification.
 
 ## Executed checks
 
@@ -29,6 +29,7 @@ Reviewed on 2026-11-09. This report distinguishes local evidence, mock-provider 
 | `npm run build` | PASS; all five pages and both Node API routes |
 | `npm run test:e2e` | Fresh post-provider owner Terminal run: 30/30 PASS in 39.5s across desktop/tablet/mobile; .last-run.json confirms passed with no failed IDs. The agent sandbox could not start its own server (listen EPERM) |
 | Real Groq HTTP flow | Initial question, progressive hints, contextual chat, correction and completion PASS; separate production-build request PASS. Model output is real, not test fixtures |
+| Hosted demo | Public five-route responsive QA: 25/25 PASS; hosted distribution request: ready/model PASS; full manual browser flow: owner-reported PASS |
 | CLI free smoke | Script/one-request guards pass tests; actual CLI network access was blocked by sandbox EPERM. Production HTTP fixture verified separately, not a claim of CLI success |
 | Fresh responsive QA | 30/30 PASS; no blocking issues. Accepted local canonical warnings remain as documented for noindex assessment pages |
 | Explicit ESLint security rules | PASS: `no-eval`, `no-implied-eval`, `no-new-func`, `no-script-url` on `src/` and `scripts/` |
@@ -46,8 +47,10 @@ The browser test server explicitly disables live tutoring; provider fixtures liv
 
 Local evidence: `/tmp/math-tutor-phase5-web-qa/`, `/tmp/math-tutor-phase5-live-result.json`, `/tmp/math-tutor-gitleaks-history.json`, `/tmp/math-tutor-npm-audit-bulk-result.json`, and current `test-results/`. These are generated local artifacts, not hosted proofs or committed secrets.
 
-Before submission as a hosted AI demo: keep the Groq account on Free without billing/upgrades, configure appropriate quota/access controls, deploy only with owner authorization, and verify the actual reviewer URL end to end. Funding OpenAI is not required. A local success would not substitute for a deployed success. Follow `RELEASE_GUIDE.md`; no API key is ever supplied to the reviewer.
+The submission demo is https://math-tutor-ai-black.vercel.app/study. The owner confirmed the hosted manual flow after redeployment. Provide its URL, accessible source code and a brief technical approach, matching the employer's original What to Submit message. Keep the Groq account on Free and disclose shared quota and browser-local progress in README; no API key is supplied to the reviewer. Hosting-account hardening remains outside the directly inspected prototype evidence.
 
 ## No-payment implementation follow-up
 
 The owner required a free service after showing a zero OpenAI balance. Groq is now default, with an owner-confirmed Free account, separate key, fixed endpoint and no automatic paid fallback. Optional OpenAI is blocked without explicit selection plus a separate paid allowance. No dependency was installed or changed. Live-model guard failures motivated tested distinctions between structural counts/pronouns and numeric values, and between a Socratic question and a grading claim. Teaching metadata is constrained to server-owned schema constants. Next dev agent-rule generation is disabled to preserve the original handoff file. See FREE_AI.md for evidence and limitations.
+
+Hosted evidence: `/tmp/math-tutor-vercel-web-qa/report.md` (five routes × five widths, zero blockers), `/tmp/math-tutor-vercel-redeployed-config.trace` (non-secret readiness), `/tmp/math-tutor-vercel-live-result.json` (actual model guidance). HTTPS and the configured response headers were observed; the site rendered without a Vercel sign-in screen. The web search reader could not open this deployment, so direct HTTPS transport and headless Chrome supplied the evidence.

@@ -58,4 +58,10 @@ Next.js dev was also found to append an agent-instruction block to the private `
 
 ## Reviewer access
 
-For a hosted demo, configure the owner's Groq Free key as a server secret and keep paid access disabled. Reviewers open the URL and do not create a key. Free quota is shared by all visitors; access controls protect availability but are not a substitute for checking the actual Free account. A public hosted demo and its exact access/hosting plan have not been configured or verified. See `RELEASE_GUIDE.md`.
+For a hosted demo, configure the owner's Groq Free key as a server secret and keep paid access disabled. Reviewers open the URL and do not create a key. Free quota is shared by all visitors; access controls protect availability but are not a substitute for checking the actual Free account. The owner published the [Vercel demo](https://math-tutor-ai-black.vercel.app/study). Public access and 25 responsive combinations passed; a hosted Groq response passed the independent distribution check, and the owner confirmed the manual browser flow. Account tariff/ownership settings remain owner-controlled rather than independently inspected. See `RELEASE_GUIDE.md`.
+
+## Hosted verification — 2026-11-09
+
+The redeployed configuration reported enabled/configured true, Groq, GPT-OSS 120B, Free confirmation true and paid allowance false. One fixed hosted request returned ready/model, independent incorrect/distribution, hint level zero, no worked example and this question: “Which terms inside the brackets should receive the outside factor?” Evidence: `/tmp/math-tutor-vercel-live-{request,result}.json` and the key-free client-to-app transport trace. No actual secret file was read. This request used the owner-confirmed Free account; no paid fallback or SDK retry occurred.
+
+The owner then reported that the complete manual website scenario worked. That statement covers their browser run; it is separate from the agent's directly observed API response and automated read-only responsive check. There is no server learning database or test record to remove; browser history remains under the user's control.

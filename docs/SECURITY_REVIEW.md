@@ -11,7 +11,7 @@ Date: 2026-11-09. Scope: current source, locked dependencies, Git history, Node 
 | Browser learning history | Applicable: strict version/schema, bounded data, corruption/quota handling and explicit deletion |
 | Accounts, roles and cross-user records | N/A: anonymous MVP with no login, user database or resource-by-owner endpoints; no invented IDOR/RLS finding |
 | Payments, webhooks, uploads, MCP and analytics | N/A: no such functionality exists |
-| Hosting, provider billing and production data | External checks only: no live deployment/account settings were inspected or changed |
+| Hosting, provider billing and production data | Public URL/API/headers checked after owner deployment; account/billing settings were not inspected or changed |
 
 ## Tool evidence and coverage limits
 
@@ -31,7 +31,7 @@ The math parser allowlists only the restricted expression grammar with 256 chara
 
 React escapes chat text. KaTeX receives only AST-controlled output or a fixed identity with `trust:false`; no raw student/model HTML or TeX is injected. Links are implementation-owned. Fonts/assets are local. Browser storage contains anonymous learning data, not credentials or authentication tokens. Loading validates version, field bounds, action uniqueness and replay; unknown/corrupt records are preserved and saving is paused. Cross-tab writes, quota errors and confirmed deletion are handled visibly.
 
-The current header configuration disables framework branding and supplies nosniff, frame denial, referrer and permission restrictions. These four headers were also observed on the local production configuration response; hosted headers remain unverified. API errors omit SDK details, keys and stack traces. Persistent logging contains no prompts, student/model text or provider credentials; guard rejections emit fixed reason identifiers only. A temporary local evaluation hook for a fixed public fixture was removed before verification. Git ignores real env/key files; all 13 private original handoff files remain excluded.
+The current header configuration disables framework branding and supplies nosniff, frame denial, referrer and permission restrictions. These four headers were also observed on the local production configuration response; the same four headers plus HSTS were also observed on the owner-published HTTPS endpoint. API errors omit SDK details, keys and stack traces. Persistent logging contains no prompts, student/model text or provider credentials; guard rejections emit fixed reason identifiers only. A temporary local evaluation hook for a fixed public fixture was removed before verification. Git ignores real env/key files; all 13 private original handoff files remain excluded.
 
 ## Findings
 
@@ -54,7 +54,7 @@ The current header configuration disables framework branding and supplies nosnif
 - Severity: CRITICAL **if** live AI is exposed publicly without an appropriate gate/shared limit; confidence high in the source limitation. No public exposure has been established in this session.
 - Location: `src/lib/tutor/limits.ts` and `src/lib/tutor/service.ts`.
 - The current30/minute, two-concurrent-call limit and short idempotency cache are per process. They reset between instances/deployments and are not a global spend cap. Origin is a browser safeguard, not authentication; a script can call the public endpoint directly.
-- Remediation before live public access: configure verified deployment protection covering the actual URL and all aliases, or add a suitable shared limiter/access gate; confirm the provider's actual credits/usage/spend controls. Until then keep hosted `TUTOR_ENABLED=false`. `RELEASE_GUIDE.md` includes a zero-provider-call check for the gate. No account system is added to the anonymous MVP merely to hide this deployment condition.
+- Remediation before any future billable public access: configure verified deployment protection covering the actual URL and all aliases, or add a suitable shared limiter/access gate; confirm the provider's actual credits/usage/spend controls. Until then keep billable tutoring disabled; the Free Groq path is described in the follow-up below. `RELEASE_GUIDE.md` includes a zero-provider-call check for the gate. No account system is added to the anonymous MVP merely to hide this deployment condition.
 
 ### S04 — CSP and deeper SAST: recommendations
 
@@ -62,9 +62,9 @@ A nonce/hash-based CSP and deeper Semgrep analysis would add defense in depth. C
 
 ## Unverified external settings
 
-Provider credit/rate/spend settings, model access, hosting account ownership/2FA, actual HTTPS and live headers, deployment protection for every alias, runtime patch level and hosted secret access remain NOT_VERIFIED. The two historical OpenAI attempts returned 429 without tutor prose. Actual local Groq tutoring and a production-build response have now passed; Groq account tier remains owner-confirmed rather than independently attested, and hosted success remains unverified. There is no live database, backup or customer record to audit.
+Provider credit/rate/spend settings, hosting account ownership/2FA, protection for every alias, runtime patch level and dashboard secret-access controls remain NOT_VERIFIED. Public HTTPS, application headers and a real hosted Groq response were checked on the published URL. The two historical OpenAI attempts returned 429 without tutor prose. Actual local Groq tutoring and a production-build response have now passed; Groq account tier remains owner-confirmed rather than independently attested, and the owner has now confirmed the hosted manual flow after the agent verified an actual model response. There is no live database, backup or customer record to audit.
 
-**Verdict: do not expose billable AI publicly until S03 and real provider access are resolved.** The deterministic local prototype and tests are reviewable now. Local pass results do not establish deployed security or a successful genuine-AI tutor.
+**Verdict: do not expose billable AI publicly until S03 and real provider access are resolved.** The deterministic local prototype and tests are reviewable now. Local pass results alone do not establish deployed security; hosted evidence is recorded separately in INFRASTRUCTURE.md and does not constitute an account/security audit.
 
 ## Free-provider follow-up — 2026-11-09
 
@@ -75,3 +75,5 @@ The prose guard now accepts generic structural counts/pronouns and genuine quest
 S03 remains a condition for any future billable public deployment. The current free path does not require funding OpenAI or enabling paid hosting protection: protect free quota/availability with appropriate controls and verify actual host/access behavior. A process limit is still not a durable global limit. Keep the provider account on Free without billing/upgrades; the application cannot enforce an external tariff if the owner later changes it. No public deployment was made.
 
 Follow-up verification: 147 tests and the owner's fresh 30-case browser run (39.5s), lint/typecheck/build pass. Redacted Gitleaks scanned seven existing commits and all 21 staged files with no leaks; client chunks contain no provider key/endpoint identifiers. All 13 original hashes match and real env files remain untracked. No target-port listener or headless Chrome remains. The lockfile and installed dependencies are unchanged.
+
+Published follow-up: five routes × five widths passed read-only hosted QA, and one fixed hosted model request passed. The owner confirmed the browser flow. No server learning database exists; the agent created no persistent production learning record. No additional paid request, account change, push or deployment was made by the agent.

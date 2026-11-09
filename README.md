@@ -2,7 +2,9 @@
 
 An English-language algebra tutor prototype built with Next.js, React and TypeScript. Students submit actual equation transformations; a restricted deterministic engine checks the mathematics, while a separate server-side model adapter supplies Socratic guidance. Related practice and learning events persist in the same browser.
 
-**No paid AI account is required.** The default provider is Groq Free with `openai/gpt-oss-120b`. Real local questions, progressive hints, chat, correction and completion have passed the server checks; a separate production-build request also passed. This is a small verified sample, not a reliability guarantee; automated tutor tests remain clearly separated mock scenarios. No hosted demo URL or successful deployed request is claimed. See [free AI setup and evidence](docs/FREE_AI.md).
+**Live demo:** [Open Study](https://math-tutor-ai-black.vercel.app/study) · [Home](https://math-tutor-ai-black.vercel.app/).
+
+**No paid AI account is required.** The default provider is Groq Free with `openai/gpt-oss-120b`. Real local questions, progressive hints, chat, correction and completion have passed the server checks; a separate production-build request also passed. This is a small verified sample, not a reliability guarantee; automated tutor tests remain clearly separated mock scenarios. The deployed Vercel demo returned a real model response, and the owner confirmed the manual browser flow on 2026-11-09. See [free AI setup and evidence](docs/FREE_AI.md).
 
 ## Run locally
 
@@ -98,11 +100,11 @@ Current local results: **147 tests, 30 browser scenarios**, lint, strict typeche
 
 Read-only responsive QA passes all five routes at 1440/1024/768/390/360/375. Git history was scanned with redacted Gitleaks with no leak found. The official npm advisory endpoint returned an empty advisory set for the locked versions; the npm CLI itself was DNS-blocked. A restricted sandbox cannot run Playwright's localhost server; use an unrestricted Terminal.
 
-The [ten-point acceptance report](docs/ACCEPTANCE_REPORT.md) records **ten local PASS criteria** with exact evidence. Genuine local model guidance is now verified through Groq; hosted reviewer access and a deployed model response remain unverified. Mock tests remain separate evidence. Known tooling/CSP/hosting limits are explicit. [Design comparison](docs/DESIGN_REVIEW.md) and [implementation history/exact files](docs/IMPLEMENTATION_PROGRESS.md) contain supporting details.
+The [ten-point acceptance report](docs/ACCEPTANCE_REPORT.md) records **ten local PASS criteria** with exact evidence. Genuine Groq guidance is verified locally and through the deployed API. The public hosted interface passed 25 responsive checks, and the owner confirmed the hosted manual flow. Mock tests remain separate evidence. Known tooling/CSP/hosting limits are explicit. [Design comparison](docs/DESIGN_REVIEW.md) and [implementation history/exact files](docs/IMPLEMENTATION_PROGRESS.md) contain supporting details.
 
 ## Submission, hosting and future platforms
 
-A hosted reviewer uses the owner's server configuration and never receives or creates a provider key. The demo can use Groq Free within its actual account quota. Public hosting has not been executed or verified. The [release guide](docs/RELEASE_GUIDE.md) contains owner-run GitHub/Vercel instructions, access checks, a free-tier smoke test and rollback steps. [Infrastructure](docs/INFRASTRUCTURE.md) records what is planned versus verified.
+A hosted reviewer uses the owner's server configuration and never receives or creates a provider key. The demo can use Groq Free within its actual account quota. The [Vercel demo](https://math-tutor-ai-black.vercel.app/study) is publicly reachable without a reviewer login. Hosted configuration, an actual model response and responsive routes were checked on 2026-11-09. The [release guide](docs/RELEASE_GUIDE.md) contains owner-run GitHub/Vercel instructions, access checks, a free-tier smoke test and rollback steps. [Infrastructure](docs/INFRASTRUCTURE.md) records what is planned versus verified.
 
 Future Web/iOS/Android work would share pure TypeScript domain contracts and a hosted API, with React Native/Expo-specific phone UI rather than a wrapped desktop page. Authenticated backend storage would replace browser-only records for multi-device use. Production work also needs durable usage controls, provider evaluation, appropriate privacy/retention and broader curriculum support. No native app exists now.
 
